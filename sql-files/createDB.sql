@@ -38,4 +38,8 @@ create table LogInInfo (
 	Account nvarchar(128),
 	Password nvarchar(128)
 );
+create table AdminInfo (
+	Account nvarchar(128) primary key,
+	Password nvarchar(128)
+);
 go

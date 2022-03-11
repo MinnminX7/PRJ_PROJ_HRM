@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <filter>
+        <filter-name>LogInFilter</filter-name>
+        <filter-class>Filter.LogInFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LogInFilter</filter-name>
+        <servlet-name>MainPage</servlet-name>
+    </filter-mapping>
+    <servlet>
+        <servlet-name>MainPage</servlet-name>
+        <servlet-class>Controller.MainPage</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MainPage</servlet-name>
+        <url-pattern>/MainPage</url-pattern>
+    </servlet-mapping>
+    <servlet>   
+        <servlet-name>Login</servlet-name>
+        <jsp-file>/Login.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Login</servlet-name>
+        <url-pattern>/Login</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+</web-app>

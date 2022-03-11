@@ -48,3 +48,6 @@ insert into Salary (EmpID,BaseSal,Extra,Fine) values
 (5, 2500000, 0, 100000),
 (6, 1800000, 80000, 0),
 (7, 2500000, 0, 50000);
+
+insert into AdminInfo (Account, Password) values
+('admin', 'admin');

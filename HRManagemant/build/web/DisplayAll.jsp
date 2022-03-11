@@ -22,7 +22,7 @@
         %>
     </head>
     <body>
-        <table>
+        <table border="1px">
             <%
                 for (Employee e : emp) {
             %>
