@@ -44,6 +44,10 @@ public class Employee {
     public void setID(int ID) {
         this.ID = ID;
     }
+    
+    public String getFullName() {
+        return FirstName + " " + LastName;
+    }
 
     public String getFirstName() {
         return FirstName;

@@ -160,14 +160,15 @@ public class LogInFilter implements Filter {
             
             if (account == null || password == null) {
                 //redirect back to login page
-                ((HttpServletResponse)response).sendRedirect("Login.jsp");
+                ((HttpServletResponse)response).sendRedirect("Login");
                 return;
             } else {
                 Authenticator auth = new Authenticator();
                 int EmpID = auth.Login(account, password);
+                
                 if (EmpID < 0) {
-                    request.setAttribute("error", "Wrong Account/Password");
-                    request.getRequestDispatcher("Login.jsp").forward(request, response);
+                    wrappedRequest.setAttribute("error", "Wrong Account/Password");
+                    wrappedRequest.getRequestDispatcher("Login").forward(wrappedRequest, wrappedResponse);
                 } else if (EmpID == 0) {
                     //go to admin's page
                     System.out.println("ADMIN HERE");

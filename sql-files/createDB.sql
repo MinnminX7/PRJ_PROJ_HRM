@@ -24,6 +24,7 @@ create table Employee (
 create table EmployeeStatus (
 	EmpID int foreign key references Employee(EmpID),
 	Attendance int,
+	LastAttend date,
 	Strikes int,
 	Holidays int
 );
@@ -41,5 +42,16 @@ create table LogInInfo (
 create table AdminInfo (
 	Account nvarchar(128) primary key,
 	Password nvarchar(128)
+);
+create table TaskInfo (
+	id int primary key,
+	Name nvarchar(128),
+	[Desc] nvarchar(1024),
+	Deadline datetime
+);
+create table StaffTask (
+	id int foreign key references TaskInfo(id),
+	EmpID int foreign key references Employee(EmpID),
+	Seen bit
 );
 go

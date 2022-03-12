@@ -5,6 +5,8 @@
  */
 package Controller;
 
+import Connector.EmployeeCtrl;
+import Model.Employee;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -38,12 +40,15 @@ public class MainPage extends HttpServlet {
             out.println("<title>Servlet MainPage</title>");            
             out.println("</head>");
             out.println("<body>");
+            
             Integer EmpID = (Integer)request.getAttribute("empid");
-            if (EmpID == null || EmpID < 0) {
-                response.sendRedirect("Login.jsp");
-                return;
+            EmployeeCtrl control = new EmployeeCtrl();
+            Employee me = control.getEmployee(EmpID);
+            
+            out.println("<h2>Welcome : " + me.getFullName() + "</h2>");
+            if (control.attendToday(EmpID)) {
+                out.println("<i style=\"color:green;\">Attended " + control.getLastAttendance(EmpID).toString() + "</i>");
             }
-            out.println("<h1>Welcome Employee ID: " + EmpID + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }

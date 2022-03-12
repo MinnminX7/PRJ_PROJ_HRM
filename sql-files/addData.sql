@@ -22,14 +22,14 @@ insert into Employee(FName, LName, BirthDate, Age, DepartmentID, PositionID, Ema
 ('Wade', 'Malone', '2000-06-01', 22, 4, 2, 'email6@company.com', '093568356'),
 ('Hoang', 'Quang', '1999-04-13', 23, 4, 1, 'email7@company.com', '053589531');
 
-insert into EmployeeStatus (EmpID, Attendance, Strikes, Holidays) values
-(1, 8, 0, 3),
-(2, 7, 1, 3),
-(3, 8, 0, 2),
-(4, 6, 2, 1),
-(5, 6, 0, 2),
-(6, 7, 1, 3),
-(7, 8, 0, 2);
+insert into EmployeeStatus (EmpID, Attendance, LastAttend, Strikes, Holidays) values
+(1, 8, '2022-03-08', 0, 3),
+(2, 7, '2022-03-08', 1, 3),
+(3, 8, '2022-03-08', 0, 2),
+(4, 6, '2022-03-08', 2, 1),
+(5, 6, '2022-03-08', 0, 2),
+(6, 7, '2022-03-08', 1, 3),
+(7, 8, '2022-03-08', 0, 2);
 
 insert into LogInInfo (EmpID,Account,Password) values
 (1, 'email1@company.com', '123456'),
