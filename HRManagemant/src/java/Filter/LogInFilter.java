@@ -6,6 +6,7 @@
 package Filter;
 
 import Connector.Authenticator;
+import Connector.EmployeeCtrl;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -157,8 +159,11 @@ public class LogInFilter implements Filter {
         try {
             String account = request.getParameter("username");
             String password = request.getParameter("password");
+            HttpSession session = ((HttpServletRequest)request).getSession();
             
-            if (account == null || password == null) {
+            if (session.getAttribute("currentEmp") != null) {
+                chain.doFilter(wrappedRequest, wrappedResponse);
+            } else if (account == null || password == null) {
                 //redirect back to login page
                 ((HttpServletResponse)response).sendRedirect("Login");
                 return;
@@ -167,13 +172,20 @@ public class LogInFilter implements Filter {
                 int EmpID = auth.Login(account, password);
                 
                 if (EmpID < 0) {
-                    wrappedRequest.setAttribute("error", "Wrong Account/Password");
-                    wrappedRequest.getRequestDispatcher("Login").forward(wrappedRequest, wrappedResponse);
+                    request.setAttribute("error", "Wrong Account/Password");
+                    request.getRequestDispatcher("Login").forward(request, response);
                 } else if (EmpID == 0) {
                     //go to admin's page
                     System.out.println("ADMIN HERE");
                 } else {
-                    wrappedRequest.setAttribute("empid", EmpID);
+                    EmployeeCtrl empCtrl = new EmployeeCtrl();
+                    session.setAttribute("currentEmp", empCtrl.getEmployee(EmpID));
+                    //check for attendance
+                    boolean attended = true;
+                    if (empCtrl.attendToday(EmpID)) {
+                        attended = false;
+                    }
+                    session.setAttribute("attended", attended);
                     chain.doFilter(wrappedRequest, wrappedResponse);
                 }
             }
@@ -383,6 +395,7 @@ public class LogInFilter implements Filter {
             if (localParams == null) {
                 return getRequest().getParameterMap();
             }
+            
             return localParams;
         }
     }

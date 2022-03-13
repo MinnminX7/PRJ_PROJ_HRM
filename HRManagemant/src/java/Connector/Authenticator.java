@@ -19,6 +19,9 @@ public class Authenticator extends Connector {
     private final String SQL =  "SELECT %s [account], [password] FROM [%s]\n" +
                                 "WHERE account='%s' AND password='%s'";
     public int Login (String account, String password) {
+        if (account == null || password == null) {
+            return -1;
+        }
         //-1 for wrong acc/pass, 0 for adminstrator, otherwise return EmployeeID
         if (AdminAuth(account, password)) {
             return 0;

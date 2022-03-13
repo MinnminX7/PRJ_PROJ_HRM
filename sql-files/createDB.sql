@@ -32,7 +32,11 @@ create table Salary (
 	EmpID int foreign key references Employee(EmpID),
 	BaseSal int,
 	Extra int,
-	Fine int
+);
+create table Fine (
+	EmpID int foreign key references Employee(EmpID),
+	Fine int,
+	[Desc] nvarchar(1024)
 );
 create table LogInInfo (
 	EmpID int foreign key references Employee(EmpID),
@@ -44,14 +48,15 @@ create table AdminInfo (
 	Password nvarchar(128)
 );
 create table TaskInfo (
-	id int primary key,
+	id int identity(1,1) primary key,
 	Name nvarchar(128),
 	[Desc] nvarchar(1024),
-	Deadline datetime
+	Deadline smalldatetime
 );
 create table StaffTask (
 	id int foreign key references TaskInfo(id),
 	EmpID int foreign key references Employee(EmpID),
-	Seen bit
+	Seen bit,
+	Mark int
 );
 go

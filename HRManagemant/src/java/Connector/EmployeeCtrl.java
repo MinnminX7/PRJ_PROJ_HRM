@@ -72,6 +72,40 @@ public class EmployeeCtrl extends Connector {
         }
         return Date.valueOf(LocalDate.now());
     }
+    public int getAttendance(int empID) {
+        try {
+            String sql = "SELECT [empid]\n" +
+                    "      ,[attendance]\n" +
+                    "  FROM [EmployeeStatus]\n" +
+                    "  WHERE [empid]=" + empID;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("attendance");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    public int getStrikes(int empID) {
+        try {
+            String sql = "SELECT [empid]\n" +
+                    "      ,[Strikes]\n" +
+                    "  FROM [EmployeeStatus]\n" +
+                    "  WHERE [empid]=" + empID;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("Strikes");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
     public boolean attendToday(int empID) {
         try {
             String sql = "SELECT [empid]\n" +
@@ -102,5 +136,39 @@ public class EmployeeCtrl extends Connector {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+    public String getDepartmentName(int DepartmentID) {
+        try {
+            String sql = "SELECT [DepartmentID]\n" +
+                    "      ,[Name]\n" +
+                    "  FROM [Department]\n" +
+                    "  WHERE [DepartmentID]=" + DepartmentID;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getString("Name");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "NONE";
+    }
+    public String getPositionName(int PositionID) {
+        try {
+            String sql = "SELECT [PositionID]\n" +
+                    "      ,[Name]\n" +
+                    "  FROM [Position]\n" +
+                    "  WHERE [PositionID]=" + PositionID;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getString("Name");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "NONE";
     }
 }
