@@ -7,6 +7,7 @@ package Filter;
 
 import Connector.Authenticator;
 import Connector.EmployeeCtrl;
+import Model.Employee;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -161,7 +162,7 @@ public class LogInFilter implements Filter {
             String password = request.getParameter("password");
             HttpSession session = ((HttpServletRequest)request).getSession();
             
-            if (session.getAttribute("currentEmp") != null) {
+            if (session.getAttribute("currentEmp") != null && session.getAttribute("currentEmp") instanceof Employee) {
                 chain.doFilter(wrappedRequest, wrappedResponse);
             } else if (account == null || password == null) {
                 //redirect back to login page
@@ -176,7 +177,11 @@ public class LogInFilter implements Filter {
                     request.getRequestDispatcher("Login").forward(request, response);
                 } else if (EmpID == 0) {
                     //go to admin's page
-                    System.out.println("ADMIN HERE");
+                    Employee admin = new Employee();
+                    admin.setID(0);
+                    session.setAttribute("currentEmp", admin);
+                    ((HttpServletResponse)response).sendRedirect("control");
+                    return;
                 } else {
                     EmployeeCtrl empCtrl = new EmployeeCtrl();
                     session.setAttribute("currentEmp", empCtrl.getEmployee(EmpID));

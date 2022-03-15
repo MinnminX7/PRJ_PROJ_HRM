@@ -6,11 +6,16 @@
 package Connector;
 
 import Model.Employee;
+import Model.EmployeeStat;
+import Model.EmployeeStat.Fine;
+import Model.EmployeeStat.LoginInfo;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -136,6 +141,141 @@ public class EmployeeCtrl extends Connector {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+    public int getEmpCount() {
+        try {
+            String sql = "SELECT [EmpID]\n" +
+                    "      , COUNT(EmpID) as [count]\n" +
+                    "  FROM [Employee]\n" +
+                    "  GROUP BY [EmpID]";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("count");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    public List<EmployeeStat> getEmpStats(int curPage, int pageLen) {
+        return this.getEmpStats(curPage, pageLen, "empid");
+    }
+    public List<EmployeeStat> getEmpStats(int curPage, int pageLen, String sortBy) {
+        int empCount = this.getEmpCount();
+        return this.get_EmpStat(curPage * pageLen + 1, curPage * pageLen + pageLen, sortBy);
+    }
+    private List<EmployeeStat> get_EmpStat(int fromRow, int toRow, String sortBy) {
+        List<EmployeeStat> list = new ArrayList<>();
+        String sort = getSortColumn(sortBy);
+        try {
+            String sql = "SELECT e.rownum\n" +
+                    "      ,e.[empid]\n" +
+                    "      ,e.[fname]\n" +
+                    "      ,e.[lname]\n" +
+                    "      ,e.[birthdate]\n" +
+                    "      ,e.[age]\n" +
+                    "      ,e.[departmentid]\n" +
+                    "      ,e.[positionid]\n" +
+                    "      ,e.[email]\n" +
+                    "      ,e.[number]\n" +
+                    "      ,es.[Attendance]\n" +
+                    "      ,es.[LastAttend]\n" +
+                    "      ,es.[Strikes]\n" +
+                    "      ,es.[Holidays]\n" +
+                    "      ,s.[BaseSal]\n" +
+                    "      ,s.[Extra]\n" +
+                    "  FROM (SELECT ROW_NUMBER() OVER (ORDER BY [" + sort +"] ASC) as rownum, * FROM [Employee]) as e\n" +
+                    "  LEFT JOIN [EmployeeStatus] es ON e.[empid]=es.[empid]\n" +
+                    "  LEFT JOIN [Salary] s ON e.[empid]=s.[empid]\n" +
+                    "  WHERE [rownum]>=" + fromRow + " AND [rownum]<=" + toRow;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next())
+            {
+                EmployeeStat e = new EmployeeStat();
+                e.setID(rs.getInt("empid"));
+                e.setFirstName(rs.getString("fname"));
+                e.setLastName(rs.getString("lname"));
+                e.setBirthDate(rs.getDate("birthdate"));
+                e.setAge(rs.getInt("age"));
+                e.setDepartmentID(rs.getInt("departmentid"));
+                e.setPositionID(rs.getInt("positionid"));
+                e.setEmail(rs.getString("email"));
+                e.setNumber(rs.getString("number"));
+                e.setAttendance(rs.getInt("Attendance"));
+                e.setLastAttend(rs.getDate("LastAttend").toLocalDate());
+                e.setStrikes(rs.getInt("Strikes"));
+                e.setHolidays(rs.getInt("Holidays"));
+                e.setBaseSal(rs.getInt("BaseSal"));
+                e.setExtra(rs.getInt("Extra"));
+                //get fines
+                String sql_fine = "SELECT [empid]\n" +
+                        "   , [Fine]\n" +
+                        "   , [Desc]\n" +
+                        "   FROM [Fine] e\n" +
+                        "   WHERE [empid]=" + e.getID();
+                List<Fine> fines = new ArrayList<>();
+                ResultSet rs_fine = connection.prepareStatement(sql_fine).executeQuery();
+                while (rs_fine.next()) {
+                    Fine fine = e.new Fine();
+                    fine.setFine(rs_fine.getInt("Fine"));
+                    fine.setDesc(rs_fine.getString("Desc"));
+                    fines.add(fine);
+                }
+                e.setFine(fines);
+                //get login infos
+                String sql_login = "SELECT [empid]\n" +
+                        "   , [Account]\n" +
+                        "   , [Password]\n" +
+                        "   FROM [LogInInfo] e\n" +
+                        "   WHERE [empid]=" + e.getID();
+                List<LoginInfo> loginInf = new ArrayList<>();
+                ResultSet rs_login = connection.prepareStatement(sql_login).executeQuery();
+                while (rs_login.next()) {
+                    LoginInfo inf = e.new LoginInfo();
+                    inf.setUsername(rs_login.getString("Account"));
+                    inf.setPassword(rs_login.getString("Password"));
+                    loginInf.add(inf);
+                }
+                e.setLoginInfo(loginInf);
+                //get tasks
+                String sql_task = "SELECT [id]\n" +
+                        "  , [EmpID]\n" +
+                        "  FROM [StaffTask]\n" +
+                        "  WHERE [EmpID]=" + e.getID();
+                List<Integer> tasks = new ArrayList<>();
+                ResultSet rs_task = connection.prepareStatement(sql_task).executeQuery();
+                while (rs_task.next()) {
+                    tasks.add(rs_task.getInt("id"));
+                }
+                e.setTasksID(tasks);
+                
+                list.add(e);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+    private String getSortColumn (String sortBy) {
+        if (sortBy == null || sortBy.length() <= 0) {
+            return "empid";
+        }
+        switch (sortBy) {
+            case "0":
+            default:
+                return "empid";
+            case "1":
+                return "fname";
+            case "2":
+                return "lname";
+            case "3":
+                return "departmentid";
+            case "4":
+                return "positionid";
+        }
     }
     public String getDepartmentName(int DepartmentID) {
         try {
