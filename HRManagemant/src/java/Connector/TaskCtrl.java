@@ -78,6 +78,7 @@ public class TaskCtrl extends Connector {
                     "      , t.[Desc]\n" +
                     "      , t.[Deadline]\n" +
                     "      , s.[Seen]\n" +
+                    "      , s.[Mark]\n" +
                     "  FROM (SELECT ROW_NUMBER() OVER (ORDER BY id DESC) as rownum, id, Name, [Desc], Deadline FROM TaskInfo) as t JOIN [StaffTask] s ON s.id = t.id\n" +
                     "  WHERE [EmpID]=" + empID + " AND t.rownum >=" + fromRow + " AND t.rownum <=" + toRow;
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -90,6 +91,7 @@ public class TaskCtrl extends Connector {
                 t.setDesc(rs.getString("Desc").replace("\\n", "\n").replace("\\t", "\t"));
                 t.setDeadline(rs.getTimestamp("Deadline").toLocalDateTime());
                 t.setSeen(rs.getBoolean("Seen"));
+                t.setAssesment(rs.getInt("Mark"));
                 sql = "SELECT t.[id]\n" +
                     "      , e.[EmpID]\n" +
                     "      , e.[FName]\n" +

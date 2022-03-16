@@ -5,15 +5,19 @@
  */
 package Connector;
 
+import Model.Department;
 import Model.Employee;
 import Model.EmployeeStat;
-import Model.EmployeeStat.Fine;
+import Model.Fine;
 import Model.EmployeeStat.LoginInfo;
+import Model.EmployeeStat.SmallTask;
+import Model.Position;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -30,7 +34,6 @@ public class EmployeeCtrl extends Connector {
                     "      ,[fname]\n" +
                     "      ,[lname]\n" +
                     "      ,[birthdate]\n" +
-                    "      ,[age]\n" +
                     "      ,[departmentid]\n" +
                     "      ,[positionid]\n" +
                     "      ,[email]\n" +
@@ -46,7 +49,6 @@ public class EmployeeCtrl extends Connector {
                         rs.getString("fname"),
                         rs.getString("lname"),
                         rs.getDate("birthdate"),
-                        rs.getInt("age"),
                         rs.getInt("departmentid"),
                         rs.getInt("positionid"),
                         rs.getString("email"),
@@ -175,7 +177,6 @@ public class EmployeeCtrl extends Connector {
                     "      ,e.[fname]\n" +
                     "      ,e.[lname]\n" +
                     "      ,e.[birthdate]\n" +
-                    "      ,e.[age]\n" +
                     "      ,e.[departmentid]\n" +
                     "      ,e.[positionid]\n" +
                     "      ,e.[email]\n" +
@@ -183,7 +184,6 @@ public class EmployeeCtrl extends Connector {
                     "      ,es.[Attendance]\n" +
                     "      ,es.[LastAttend]\n" +
                     "      ,es.[Strikes]\n" +
-                    "      ,es.[Holidays]\n" +
                     "      ,s.[BaseSal]\n" +
                     "      ,s.[Extra]\n" +
                     "  FROM (SELECT ROW_NUMBER() OVER (ORDER BY [" + sort +"] ASC) as rownum, * FROM [Employee]) as e\n" +
@@ -199,7 +199,6 @@ public class EmployeeCtrl extends Connector {
                 e.setFirstName(rs.getString("fname"));
                 e.setLastName(rs.getString("lname"));
                 e.setBirthDate(rs.getDate("birthdate"));
-                e.setAge(rs.getInt("age"));
                 e.setDepartmentID(rs.getInt("departmentid"));
                 e.setPositionID(rs.getInt("positionid"));
                 e.setEmail(rs.getString("email"));
@@ -207,24 +206,10 @@ public class EmployeeCtrl extends Connector {
                 e.setAttendance(rs.getInt("Attendance"));
                 e.setLastAttend(rs.getDate("LastAttend").toLocalDate());
                 e.setStrikes(rs.getInt("Strikes"));
-                e.setHolidays(rs.getInt("Holidays"));
                 e.setBaseSal(rs.getInt("BaseSal"));
                 e.setExtra(rs.getInt("Extra"));
                 //get fines
-                String sql_fine = "SELECT [empid]\n" +
-                        "   , [Fine]\n" +
-                        "   , [Desc]\n" +
-                        "   FROM [Fine] e\n" +
-                        "   WHERE [empid]=" + e.getID();
-                List<Fine> fines = new ArrayList<>();
-                ResultSet rs_fine = connection.prepareStatement(sql_fine).executeQuery();
-                while (rs_fine.next()) {
-                    Fine fine = e.new Fine();
-                    fine.setFine(rs_fine.getInt("Fine"));
-                    fine.setDesc(rs_fine.getString("Desc"));
-                    fines.add(fine);
-                }
-                e.setFine(fines);
+                e.setFine(getFine(e.getID()));
                 //get login infos
                 String sql_login = "SELECT [empid]\n" +
                         "   , [Account]\n" +
@@ -241,16 +226,24 @@ public class EmployeeCtrl extends Connector {
                 }
                 e.setLoginInfo(loginInf);
                 //get tasks
-                String sql_task = "SELECT [id]\n" +
-                        "  , [EmpID]\n" +
-                        "  FROM [StaffTask]\n" +
-                        "  WHERE [EmpID]=" + e.getID();
-                List<Integer> tasks = new ArrayList<>();
+                String sql_task = "SELECT s.[id]\n" +
+                        "  , t.[Name]\n" +
+                        "  , t.[Desc]\n" +
+                        "  , s.[Mark]\n" +
+                        "  , t.[Deadline]\n" +
+                        "  FROM [StaffTask] s JOIN [TaskInfo] t ON s.id=t.id AND s.[EmpID]=" + e.getID();
+                List<SmallTask> tasks = new ArrayList<>();
                 ResultSet rs_task = connection.prepareStatement(sql_task).executeQuery();
                 while (rs_task.next()) {
-                    tasks.add(rs_task.getInt("id"));
+                    SmallTask st = e.new SmallTask();
+                    st.setId(rs_task.getInt("id"));
+                    st.setMark(rs_task.getInt("Mark"));
+                    st.setName(rs_task.getString("Name"));
+                    st.setDesc(rs_task.getString("Desc"));
+                    st.setFinished(rs_task.getTimestamp("Deadline").toLocalDateTime().isBefore(LocalDateTime.now()));
+                    tasks.add(st);
                 }
-                e.setTasksID(tasks);
+                e.setTasks(tasks);
                 
                 list.add(e);
             }
@@ -310,5 +303,89 @@ public class EmployeeCtrl extends Connector {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "NONE";
+    }
+    public List<Department> getDepartments() {
+        List<Department> list = new ArrayList<>();
+        try {
+            String sql = "SELECT [DepartmentID]\n" +
+                    "      ,[Name]\n" +
+                    "  FROM [Department]";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next())
+            {
+                list.add(new Department(rs.getInt("DepartmentID"), rs.getString("Name")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+    public List<Position> getPositions() {
+        List<Position> list = new ArrayList<>();
+        try {
+            String sql = "SELECT [PositionID]\n" +
+                    "      ,[Name]\n" +
+                    "  FROM [Position]";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next())
+            {
+                list.add(new Position(rs.getInt("PositionID"), rs.getString("Name")));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+    public List<Fine> getFine(int empid) {
+        List<Fine> fines = new ArrayList<>();
+        try {
+            String sql_fine = "SELECT [id]\n" +
+                    "   , [empid]\n" +
+                    "   , [Fine]\n" +
+                    "   , [Desc]\n" +
+                    "   FROM [Fine]\n" +
+                    "   WHERE [empid]=" + empid;
+            ResultSet rs_fine = connection.prepareStatement(sql_fine).executeQuery();
+            while (rs_fine.next()) {
+                Fine fine = new Fine();
+                fine.setId(rs_fine.getInt("id"));
+                fine.setFine(rs_fine.getInt("Fine"));
+                fine.setDesc(rs_fine.getString("Desc"));
+                fines.add(fine);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return fines;
+    }
+    public void addFine (int empID, int value, String desc) {
+        try {
+            String sql = "INSERT INTO Fine (empid, fine, [desc]) VALUES\n" +
+                        String.format("(%d, %d, '%s')", empID, value, desc);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void editFine (int id, int newValue, String newDesc) {
+        try {
+            String sql = "UPDATE Fine\n" +
+                    String.format("SET fine=%d, [desc]=%s\n", newValue, newDesc) +
+                    String.format("WHERE id=%d", id);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void removeFine(int id) {
+        try {
+            String sql = "DELETE FROM Fine\n" +
+                    String.format("WHERE id=%d", id);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

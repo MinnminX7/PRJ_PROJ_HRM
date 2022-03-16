@@ -41,7 +41,6 @@ public class Connector {
                    "      ,[fname]\n" +
                    "      ,[lname]\n" +
                    "      ,[birthdate]\n" +
-                   "      ,[age]\n" +
                    "      ,[departmentid]\n" +
                    "      ,[positionid]\n" +
                    "      ,[email]\n" +
@@ -56,7 +55,6 @@ public class Connector {
                        rs.getString("fname"),
                        rs.getString("lname"),
                        rs.getDate("birthdate"),
-                       rs.getInt("age"),
                        rs.getInt("departmentid"),
                        rs.getInt("positionid"),
                        rs.getString("email"),

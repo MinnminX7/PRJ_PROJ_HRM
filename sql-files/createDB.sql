@@ -15,12 +15,12 @@ create table Employee (
 	FName nvarchar(32),
 	LName nvarchar(32),
 	BirthDate date,
-	Age int,
 	DepartmentID int foreign key references Department(DepartmentID),
 	PositionID int foreign key references Position(PositionID),
 	Email nvarchar(32),
 	Number nvarchar(12)
 );
+
 create table EmployeeStatus (
 	EmpID int foreign key references Employee(EmpID),
 	Attendance int,
@@ -34,6 +34,7 @@ create table Salary (
 	Extra int,
 );
 create table Fine (
+	id int primary key identity(1,1),
 	EmpID int foreign key references Employee(EmpID),
 	Fine int,
 	[Desc] nvarchar(1024)

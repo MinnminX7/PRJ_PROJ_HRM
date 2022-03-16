@@ -8,10 +8,13 @@ package Controller;
 import Connector.EmployeeCtrl;
 import Connector.TaskCtrl;
 import Model.Employee;
+import Model.Fine;
 import Model.Task;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -38,17 +41,18 @@ public class MainPage extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
+            HttpSession session = request.getSession();
+            Employee me = (Employee)session.getAttribute("currentEmp");
+            
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
             out.println("<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3\" crossorigin=\"anonymous\">");
-            out.println("<title>Staff's page</title>");            
+            out.println("<title>" + me.getFirstName() +"\'s page</title>");            
             out.println("</head>");
             out.println("<body>");
             
-            HttpSession session = request.getSession();
-            Employee me = (Employee)session.getAttribute("currentEmp");
+            
             Boolean isAttended = (Boolean)session.getAttribute("attended");
             
             out.println("<style>body{font-family:\"Noto Sans\", sans-serif;}\n" +
@@ -62,9 +66,11 @@ public class MainPage extends HttpServlet {
                     ".seen {max-width: 100%; font-size: 20px; background-color: #c7c7c7;text-align: left;}" +
                     ".unseen {max-width: 100%; font-size: 20px; background-color: #fafafa;text-align: left;outline-color:red;outline-style:solid;outline-width: thin;}" +
                     ".btn-group-vertical {max-width: 100%}" +
+                    ".big-alert {font-weight: bold; font-size: 25px}" +
+                    ".deadline {font-weight: bold;text-align: right;}" +
                     "</style>");
             out.println("<div class=\"container\">");
-            out.println("<p class=\"head\">Welcome : " + me.getFullName() + "</p>");
+            out.println("<div class=\"row\"><p class=\"col head\">Welcome : " + me.getFullName() + "</p><a href=\"logout\" class=\"col-auto\">Log out</a>");
             //show attended msg
             if (!isAttended) {
                 out.println("<div class=\"alert alert-info\" role=\"alert\">Attended " + date2String(LocalDate.now()) + "</div>");
@@ -115,6 +121,17 @@ public class MainPage extends HttpServlet {
                     }
                 }
                 out.println("</div>");
+                //fines
+                List<Fine> fines = control.getFine(me.getID());
+                out.println("<h4 class=\"mt-2\"><b>Fines:</b></h4>");
+                out.println("<table class=\"table table-hover mx-2\">");
+                out.println("<thead><tr><th>Amount</th> <th>Description</th></tr></thead>");
+                out.println("<tbody>");
+                for (Fine f : fines) {
+                    out.println("<tr><td>" + f.getFine() + "</td><td>" + f.getDesc() + "</td></tr>");
+                }
+                out.println("</tbody>");
+                out.println("</table>");
             } else if (curTab == 1) {
                 out.println("<ul class=\"nav nav-tabs\">\n" +
                             "   <li class=\"nav-item\">\n" +
@@ -139,8 +156,11 @@ public class MainPage extends HttpServlet {
                         taskCtrl.sawTask(me.getID(), task.getId());
                         task.setSeen(true);
                     }
-                    out.println("<div class=\"card\">");
-                    out.println("<div class=\"card-header row\"><div clas=\"col-md-2\"><a href=\"MainPage?tab=1&page=" + page + "\"><img class=\"back\" src=\"resources/img/arrow-left-square.svg\"></a></div> <div class=\"col-md-10\">" + toHtmlString(task.getName()) + "</div></div>");
+                    out.println("<div class=\"card mt-2 mb-2\">");
+                    out.println("<div class=\"card-header row\">" +
+                            "<div class=\"col-auto\"><a href=\"MainPage?tab=1&page=" + page + "\"><img class=\"back me-2\" src=\"resources/img/arrow-left-square.svg\" width=\"32\" height=\"32\"></a></div>" +
+                            "<div class=\"col my-auto\">" + toHtmlString(task.getName()) + "</div></div>");
+                    out.println("<div class=\"card-body\">Deadline: " + task.getDeadline().toString() + "</div>");
                     out.println("<div class=\"card-body\">" + toHtmlString(task.getDesc()) + "</div>");
                     out.println("<div class=\"card-body\">Member: </br>");
                     for (int i = 0; i < task.getAssignedEmp().size(); i++) {
@@ -148,10 +168,19 @@ public class MainPage extends HttpServlet {
                     }
                     out.println("</div>");
                     out.println("</div>");
+                    //assesment
+                    if (task.getDeadline().isBefore(LocalDateTime.now())) {
+                        out.println("<div class=\"alert alert-primary big-alert\">");
+                        out.println("Assessment: " + task.getAssesment() + "/100");
+                        out.println("</div>");
+                    }
                 } else {
                     out.println("<div>");
                     for (int i = 0; i < tasks.size(); i++) {
-                        out.println("<div class=\"row\"><a href=\"MainPage?tab=1&page=" + page + "&task=" + i + "\" class=\"btn mt-1" + (tasks.get(i).isSeen() ? " seen" : " unseen") +"\" role=\"button\">" + toHtmlString(tasks.get(i).getName()) + (tasks.get(i).isSeen() ? "" : "    <span class=\"badge red\">New</span>") + "</a></div>");
+                        out.println("<div class=\"row mt-1 mb-1" + (tasks.get(i).isSeen() ? " seen" : " unseen") + "\">" +
+                                "<a href=\"MainPage?tab=1&page=" + page + "&task=" + i + "\" class=\"btn\" role=\"button\"><div class=\"row\"><div class=\"col-sm-10\" style=\"text-align: left\">" + toHtmlString(tasks.get(i).getName()) + (tasks.get(i).isSeen() ? "" : "    <span class=\"badge red\">New</span>") + "</div>" +
+                                "<div class=\"col-sm-2 deadline\">" + getRemainTime(tasks.get(i).getDeadline()) + "</div></div></a>" +
+                                "</div>");
                     }
                     out.println("</div>");
                     //pagination
@@ -177,7 +206,32 @@ public class MainPage extends HttpServlet {
             out.println("</html>");
         }
     }
-    
+    private String getRemainTime (LocalDateTime t) {
+        LocalDateTime now = LocalDateTime.now();
+        if (t.isBefore(now)) {
+            return "Finished.";
+        }
+        long num = 0;
+        num = now.until(t, ChronoUnit.YEARS);
+        if (num > 0) {
+            return num + " year" + (num == 1 ? "" : "s") + " remain.";
+        }
+        num = now.until(t, ChronoUnit.MONTHS);
+        if (num > 0) {
+            return num + " month" + (num == 1 ? "" : "s") + " remain.";
+        }
+        num = now.until(t, ChronoUnit.DAYS);
+        if (num > 0) {
+            return num + " day" + (num == 1 ? "" : "s") + " remain.";
+        }
+        String time = "";
+        num = now.until(t, ChronoUnit.HOURS);
+        if (num > 0) {
+            time = num + "h";
+        }
+        num = Long.max(now.until(t, ChronoUnit.MINUTES), 0);
+        return time += num + "m remain.";
+    }
     private String date2String(LocalDate d) {
         return String.format("%02d/%02d/%d", d.getDayOfMonth(), d.getMonthValue(), d.getYear());
     }

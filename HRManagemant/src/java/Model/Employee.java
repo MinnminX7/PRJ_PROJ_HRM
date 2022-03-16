@@ -16,7 +16,6 @@ public class Employee {
     private String FirstName;
     private String LastName;
     private Date BirthDate;
-    private int Age;
     private int DepartmentID;
     private int PositionID;
     private String Email;
@@ -25,12 +24,11 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(int ID, String FirstName, String LastName, Date BirthDate, int Age, int DepartmentID, int PositionID, String Email, String Number) {
+    public Employee(int ID, String FirstName, String LastName, Date BirthDate, int DepartmentID, int PositionID, String Email, String Number) {
         this.ID = ID;
         this.FirstName = FirstName;
         this.LastName = LastName;
         this.BirthDate = BirthDate;
-        this.Age = Age;
         this.DepartmentID = DepartmentID;
         this.PositionID = PositionID;
         this.Email = Email;
@@ -71,14 +69,6 @@ public class Employee {
 
     public void setBirthDate(Date BirthDate) {
         this.BirthDate = BirthDate;
-    }
-
-    public int getAge() {
-        return Age;
-    }
-
-    public void setAge(int Age) {
-        this.Age = Age;
     }
 
     public int getDepartmentID() {

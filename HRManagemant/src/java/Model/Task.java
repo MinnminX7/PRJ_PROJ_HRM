@@ -18,17 +18,19 @@ public class Task {
     private String Desc;
     private LocalDateTime Deadline;
     private boolean Seen;
+    private int Assesment;
     private List<Member> assignedEmp;
 
     public Task() {
     }
 
-    public Task(int id, String Name, String Desc, LocalDateTime Deadline, boolean Seen, List<Member> assignedEmp) {
+    public Task(int id, String Name, String Desc, LocalDateTime Deadline, boolean Seen, int Assesment, List<Member> assignedEmp) {
         this.id = id;
         this.Name = Name;
         this.Desc = Desc;
         this.Deadline = Deadline;
         this.Seen = Seen;
+        this.Assesment = Assesment;
         this.assignedEmp = assignedEmp;
     }
 
@@ -39,10 +41,19 @@ public class Task {
         this.Deadline = Deadline;
         this.assignedEmp = assignedEmp;
         this.Seen = false;
+        this.Assesment = 0;
     }
 
     public boolean isSeen() {
         return Seen;
+    }
+
+    public int getAssesment() {
+        return Assesment;
+    }
+
+    public void setAssesment(int Assesment) {
+        this.Assesment = Assesment;
     }
 
     public void setSeen(boolean Seen) {

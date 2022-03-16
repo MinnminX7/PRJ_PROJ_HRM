@@ -38,7 +38,7 @@
             <%
                 String error = (String)request.getAttribute("error");
                 if (error != null) {
-                    out.println("<div class=\"alert alert-danger custom-text\" role=\"alert\">" + error + "</div>");
+                    out.println("<div class=\"alert alert-danger custom-text custom-width\" role=\"alert\">" + error + "</div>");
                 }
             %>
             <form action="MainPage">

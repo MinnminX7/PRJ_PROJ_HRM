@@ -18,7 +18,11 @@
     </servlet>
     <servlet>
         <servlet-name>AdminController</servlet-name>
-        <servlet-class>Controller.AdminController</servlet-class>
+        <servlet-class>Controller.AdminPage</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>Controller.LogoutServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>MainPage</servlet-name>
@@ -35,6 +39,10 @@
     <servlet-mapping>
         <servlet-name>AdminController</servlet-name>
         <url-pattern>/control</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
