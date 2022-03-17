@@ -25,8 +25,7 @@ create table EmployeeStatus (
 	EmpID int foreign key references Employee(EmpID),
 	Attendance int,
 	LastAttend date,
-	Strikes int,
-	Holidays int
+	Strikes int
 );
 create table Salary (
 	EmpID int foreign key references Employee(EmpID),

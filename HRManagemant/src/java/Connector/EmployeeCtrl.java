@@ -16,6 +16,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -371,9 +372,9 @@ public class EmployeeCtrl extends Connector {
     }
     public void editFine (int id, int newValue, String newDesc) {
         try {
-            String sql = "UPDATE Fine\n" +
-                    String.format("SET fine=%d, [desc]=%s\n", newValue, newDesc) +
-                    String.format("WHERE id=%d", id);
+            String sql = "UPDATE [Fine]\n" +
+                    String.format("SET [fine]=%d, [desc]='%s'\n", newValue, newDesc) +
+                    String.format("WHERE [id]=%d;", id);
             connection.prepareStatement(sql).executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
@@ -384,6 +385,64 @@ public class EmployeeCtrl extends Connector {
             String sql = "DELETE FROM Fine\n" +
                     String.format("WHERE id=%d", id);
             connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public int getDepartmentID(String depart) {
+        try {
+            String sql = "SELECT [DepartmentID]\n" +
+                    "      ,[Name]\n" +
+                    "  FROM [Department]\n" +
+                    "  WHERE [Name] LIKE '" + depart + "'";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("DepartmentID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+    public int getPositionID(String position) {
+        try {
+            String sql = "SELECT [PositionID]\n" +
+                    "      ,[Name]\n" +
+                    "  FROM [Position]\n" +
+                    "  WHERE [Name] LIKE '" + position + "'";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("PositionID");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+    public void updateEmpStat (EmployeeStat emp) {
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            String sql_info = "UPDATE [Employee]\n" +
+                    String.format("SET [lname]='%s', [fname]='%s', [birthdate]='%s', [DepartmentID]=%d, [PositionID]=%d, [email]='%s', [number]='%s'\n",
+                            emp.getLastName(), emp.getFirstName(), formatter.format(emp.getBirthDate()), emp.getDepartmentID(), emp.getPositionID(), emp.getEmail(), emp.getNumber()) +
+                    String.format("WHERE [empid]=%d;", emp.getID());
+            connection.prepareStatement(sql_info).executeUpdate();
+            
+            String sql_stat = "UPDATE [EmployeeStatus]\n" +
+                    String.format("SET [Attendance]=%d, [LastAttend]='%s', [Strikes]=%d\n",
+                            emp.getAttendance(), emp.getLastAttend().toString(), emp.getStrikes()) +
+                    String.format("WHERE [EmpID]=%d;", emp.getID());
+            connection.prepareStatement(sql_stat).executeUpdate();
+            
+            String sql_salary = "UPDATE [Salary]\n" +
+                    String.format("SET [BaseSal]=%d, [Extra]=%d\n",
+                            emp.getBaseSal(), emp.getExtra()) +
+                    String.format("WHERE [empid]=%d;", emp.getID());
+            connection.prepareStatement(sql_salary).executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }

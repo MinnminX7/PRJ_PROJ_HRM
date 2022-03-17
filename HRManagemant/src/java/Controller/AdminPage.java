@@ -62,6 +62,7 @@ public class AdminPage extends HttpServlet {
                     ".spoiler:hover {background-color:white;}" +
                     "</style>");
             out.println("<div class=\"container\">");
+            out.println("<div style=\"text-align:right; position:relative;\"><a href=\"logout\">Log out</a></div>");
             HttpSession session = request.getSession();
             
             int curTab = 0;
@@ -138,9 +139,51 @@ public class AdminPage extends HttpServlet {
                                     "</nav>");
                     } else {
                         int action = Integer.parseInt(request.getParameter("action"));
-                        EmployeeStat empSt = empList.get(Integer.parseInt(request.getParameter("emp")));
+                        int empid = Integer.parseInt(request.getParameter("emp"));
+                        if (action == 1) {
+                            //to add fine
+                            if (!this.isParameterNullOrEmpty(request.getParameter("addFine"))) {
+                                ctrl.addFine(empList.get(empid).getID(), Integer.parseInt(request.getParameter("fineCreateValue")), request.getParameter("fineCreateDesc"));
+                                response.sendRedirect("control?tab=0&page=" + page + "&emp=" + empid + "&action=1");
+                                return;
+                            }
+                            //edit fine
+                            if (!this.isParameterNullOrEmpty(request.getParameter("editFine"))) {
+                                int fineID = Integer.parseInt(request.getParameter("editFine"));
+                                ctrl.editFine(fineID, Integer.parseInt(request.getParameter("fineEditValue")), request.getParameter("fineEditDesc"));
+                                response.sendRedirect("control?tab=0&page=" + page + "&emp=" + empid + "&action=1");
+                                return;
+                            }
+                            //delete fine
+                            if (!this.isParameterNullOrEmpty(request.getParameter("delFine"))) {
+                                int fineID = Integer.parseInt(request.getParameter("delFine"));
+                                ctrl.removeFine(fineID);
+                                response.sendRedirect("control?tab=0&page=" + page + "&emp=" + empid + "&action=1");
+                                return;
+                            }
+                            //update empStat
+                            if (!this.isParameterNullOrEmpty(request.getParameter("updateEmp"))) {
+                                EmployeeStat emp = empList.get(empid);
+                                emp.setFirstName(request.getParameter("empFName"));
+                                emp.setLastName(request.getParameter("empLName"));
+                                emp.setBirthDate(java.sql.Date.valueOf(request.getParameter("empBDate")));
+                                emp.setDepartmentID(ctrl.getDepartmentID(request.getParameter("empDepartment")));
+                                emp.setPositionID(ctrl.getPositionID(request.getParameter("empPosition")));
+                                emp.setEmail(request.getParameter("empEmail"));
+                                emp.setNumber(request.getParameter("empNumber"));
+                                emp.setStrikes(Integer.parseInt(request.getParameter("empStrikes")));
+                                emp.setAttendance(Integer.parseInt(request.getParameter("empAttend")));
+                                emp.setLastAttend(LocalDate.now());
+                                emp.setBaseSal(Integer.parseInt(request.getParameter("empSal")));
+                                emp.setExtra(Integer.parseInt(request.getParameter("empExtra")));
+                                ctrl.updateEmpStat(emp);
+                                response.sendRedirect("control?tab=0&page=" + page + "&emp=" + empid + "&action=0");
+                                return;
+                            }
+                        }
+                        EmployeeStat empSt = empList.get(empid);
                         if (action == 0 || action == 1) {
-                            EmpViewNEdit(out, empSt, ctrl, action == 1);
+                            EmpViewNEdit(out, request, empSt, ctrl, action == 1);
                         }
                     }
                     break;
@@ -195,6 +238,13 @@ public class AdminPage extends HttpServlet {
             }
             out.println("</div>");
             out.println("<script>" + 
+                    "function updateAttend() {" +
+                    "var now = new Date();" +
+                    "var att = document.getElementById('attendance').value;" +
+                    "var max = now.getDate();" +
+                    "var miss = max - att;" +
+                    "document.getElementById('attendStat').innerText = 'Attended: ' + att + ', Missed: ' + miss;" +
+                    "}" +
                     "</script>");
             out.println("<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js\" integrity=\"sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p\" crossorigin=\"anonymous\"></script>");
             out.println("</body>");
@@ -203,39 +253,40 @@ public class AdminPage extends HttpServlet {
         }
     }
 
-    private void EmpViewNEdit(final PrintWriter out, EmployeeStat empSt, EmployeeCtrl ctrl, boolean edit) {
+    private void EmpViewNEdit(final PrintWriter out, HttpServletRequest request, EmployeeStat empSt, EmployeeCtrl ctrl, boolean edit) {
+        out.println("<form action=\"control?tab=0&page=" + request.getParameter("page") + "&emp=" + request.getParameter("emp") + "&action=1&updateEmp=1\" method=POST id=\"EditEmpForm\">");
         //first row
         out.println("<div class=\"row mt-4 mb-4\">");
         out.println("<div class=\"col-sm-2 me-2\">");
         out.println("<div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">ID</label>\n" +
-                "   <input type=\"number\" class=\"form-control\" value=\"" + empSt.getID() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"number\" name=\"empID\" class=\"form-control\" value=\"" + empSt.getID() + "\" readonly>\n" +
                         "</div>");
         out.println("</div>");
         out.println("<div class=\"col ms-2 me-2\">");
         out.println("<div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">First Name</label>\n" +
-                "   <input type=\"text\" class=\"form-control\" value=\"" + empSt.getFirstName() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"text\" name=\"empFName\" class=\"form-control\" value=\"" + empSt.getFirstName() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("<div class=\"col ms-2 ms-2\">");
         out.println("<div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">Last Name</label>\n" +
-                "   <input type=\"text\" class=\"form-control\" value=\"" + empSt.getLastName() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"text\" name=\"empLName\" class=\"form-control\" value=\"" + empSt.getLastName() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("<div class=\"col-sm-3 ms-2\">");
         out.println("<div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">Birth Date</label>\n" +
-                "   <input type=\"date\" class=\"form-control\" value=\"" + empSt.getBirthDate().toString() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"date\" name=\"empBDate\" class=\"form-control\" value=\"" + empSt.getBirthDate().toString() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("</div>");
         //second row
         out.println("<div class=\"row mt-4 mb-4\">");
         out.println("<div class=\"col input-group me-2\">\n" +
-                "   <label class=\"input-group-text\" for=\"departmentPick\">Department:</label>\n" +
-                "   <select class=\"form-select\" id=\"departmentPick\"" + (!edit ? " disabled" : "") + ">\n");
+                "   <label class=\"input-group-text\" for=\"departmentPick\">Department</label>\n" +
+                "   <select class=\"form-select\" name=\"empDepartment\" id=\"departmentPick\"" + (!edit ? " disabled" : "") + ">\n");
         List<Department> departments = ctrl.getDepartments();
         for (Department d : departments) {
             out.println("<option" + (d.getId() == empSt.getDepartmentID() ? " selected" : "") + ">" + d.getName() + "</option>\n");
@@ -243,8 +294,8 @@ public class AdminPage extends HttpServlet {
         out.println("   </select>\n" +
                 "</div>");
         out.println("<div class=\"col input-group ms-2\">\n" +
-                "   <label class=\"input-group-text\" for=\"positionPick\">Department:</label>\n" +
-                "   <select class=\"form-select\" id=\"positionPick\"" + (!edit ? " disabled" : "") + ">\n");
+                "   <label class=\"input-group-text\" for=\"positionPick\">Position</label>\n" +
+                "   <select class=\"form-select\" name=\"empPosition\" id=\"positionPick\"" + (!edit ? " disabled" : "") + ">\n");
         List<Position> positions = ctrl.getPositions();
         for (Position p : positions) {
             out.println("<option" + (p.getId() == empSt.getPositionID()? " selected" : "") + ">" + p.getName() + "</option>\n");
@@ -257,13 +308,13 @@ public class AdminPage extends HttpServlet {
         out.println("<div class=\"col-sm-7 me-2\">");
         out.println("<div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">Email</label>\n" +
-                "   <input type=\"email\" class=\"form-control\" value=\"" + empSt.getEmail() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"email\" name=\"empEmail\" class=\"form-control\" value=\"" + empSt.getEmail() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("<div class=\"col ms-2\">");
         out.println("<div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">Contract Number</label>\n" +
-                "   <input type=\"number\" class=\"form-control\" value=\"" + empSt.getNumber() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"text\" name=\"empNumber\" class=\"form-control\" value=\"" + empSt.getNumber() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("</div>");
@@ -273,69 +324,105 @@ public class AdminPage extends HttpServlet {
         out.println("<div class=\"row mt-4 mb-4\">");
         out.println("<div class=\"col-sm-2 me-2\"><div class=\"input-group\">\n" +
                 "   <label class=\"input-group-text\">Strikes</label>\n" +
-                "   <input type=\"number\" class=\"form-control\" value=\"" + empSt.getStrikes() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <input type=\"number\" name=\"empStrikes\" class=\"form-control\" value=\"" + empSt.getStrikes() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div></div>");
         int maxAttend = LocalDate.now().getDayOfMonth();
-        out.println("<div class=\"col-auto ms-2\"><label for=\"attendance\">Attended: " + empSt.getAttendance() + ", Missed: " + (maxAttend - empSt.getAttendance()) +"<i>(Last attendance in " + empSt.getLastAttend().toString() + ")</i></label>\n" +
-                "<input type=\"range\" class=\"form-range\" min=\"0\" max=\"" + maxAttend + "\" value=\"" + empSt.getAttendance() + "\" step=\"1\" id=\"attendance\"" + (!edit ? " disabled" : "") + ">");
+        out.println("<div class=\"col-auto ms-2\"><label for=\"attendance\" id=\"attendStat\">Attended: " + empSt.getAttendance() + ", Missed: " + (maxAttend - empSt.getAttendance()) +"</label><i> (Last attendance in " + LocalDate.now().toString() + ")</i>\n" +
+                "<input type=\"range\" name=\"empAttend\" class=\"form-range\" min=\"0\" max=\"" + maxAttend + "\" value=\"" + empSt.getAttendance() + "\" step=\"1\" id=\"attendance\"" + (!edit ? " disabled" : "") + " onInput=\"updateAttend()\">");
         out.println("</div></div>");
         //salary
         out.println("<div class=\"row mt-4 mb-4\">");
         out.println("<div class=\"col me-2\">");
         out.println("<div class=\"input-group\">\n" +
-                "   <label class=\"input-group-text\">Base Salary:</label>\n" +
-                "   <input type=\"number\" class=\"form-control\" value=\"" + empSt.getBaseSal() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <label class=\"input-group-text\">Base Salary</label>\n" +
+                "   <input type=\"number\" name=\"empSal\" class=\"form-control\" value=\"" + empSt.getBaseSal() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("<div class=\"col ms-2\">");
         out.println("<div class=\"input-group\">\n" +
-                "   <label class=\"input-group-text\">Extra Money:</label>\n" +
-                "   <input type=\"number\" class=\"form-control\" value=\"" + empSt.getExtra() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                "   <label class=\"input-group-text\">Extra Money</label>\n" +
+                "   <input type=\"number\" name=\"empExtra\" class=\"form-control\" value=\"" + empSt.getExtra() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div>");
         out.println("</div>");
         out.println("</div>");
+        
+        out.println("</form>");
+        if (edit) {
+            out.println("<div class=\"row justify-content-end\"><div class=\"col-sm-8\"></div> <a href=\"control?tab=0&page=" + request.getParameter("page") + "\" type=\"button\" class=\"btn btn-secondary col-auto me-2\">Close</a>\n" +
+                        "<button type=\"submit\" class=\"btn btn-primary col-auto\" form=\"EditEmpForm\">Update Changes</button>\n");
+        }
+        //line
+        out.println("<div class=\"row mt-4 mb-4\"><div class=\"divider\"></div></div>");
         //fine
+        out.println("<h4><b>Fine:</b></h4>");
         List<Fine> fines = empSt.getFine();
         //create modal to create fine
         if (edit) {
-            out.println("<button type=\"button\" class=\"btn btn-primary\" data-bs-toggle=\"modal\" data-bs-target=\"#fineCreate\">Create Fine</button>");
+            out.println("<div class=\"row\"><button type=\"button\" class=\"btn btn-primary col-auto\" data-bs-toggle=\"modal\" data-bs-target=\"#fineCreate\">Create Fine</button> <h5 class=\"col-auto\"><i>(Change will be made immediately)</i></h5></div>");
             out.println("<div class=\"modal fade\" id=\"fineCreate\" tabindex=\"-1\">\n" +
-                        "  <div class=\"modal-dialog\">\n" +
-                        "    <div class=\"modal-content\">\n" +
-                        "      <div class=\"modal-header\">\n" +
-                        "        <h5 class=\"modal-title\">Create a new fine</h5>\n" +
-                        "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n" +
-                        "      </div>\n" +
-                        "      <div class=\"modal-body\">\n" +
-                        "        <form>\n" +
-                        "          <div class=\"mb-3\">\n" +
-                        "            <label for=\"recipient-name\" class=\"col-form-label\">Fine Amount:</label>\n" +
-                        "            <input type=\"number\" class=\"form-control\" id=\"fineCreateValue\">\n" +
-                        "          </div>\n" +
-                        "          <div class=\"mb-3\">\n" +
-                        "            <label for=\"message-text\" class=\"col-form-label\">Description:</label>\n" +
-                        "            <textarea class=\"form-control\" id=\"fineCreateDesc\"></textarea>\n" +
-                        "          </div>\n" +
-                        "        </form>\n" +
+                        "   <form action=\"control?tab=0&page=" + request.getParameter("page") + "&emp=" + request.getParameter("emp") + "&action=1&addFine=1\" method=\"POST\">" +
+                        "       <div class=\"modal-dialog\">\n" +
+                        "           <div class=\"modal-content\">\n" +
+                        "               <div class=\"modal-header\">\n" +
+                        "                   <h5 class=\"modal-title\">Create a new fine</h5>\n" +
+                        "                   <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n" +
+                        "               </div>\n" +
+                        "           <div class=\"modal-body\">\n" +
+                        "           <div class=\"mb-3\">\n" +
+                        "               <label for=\"fineCreateValue\">Fine Amount:</label>\n" +
+                        "               <input type=\"number\" class=\"form-control\" id=\"fineCreateValue\" name=\"fineCreateValue\" required>\n" +
+                        "           </div>\n" +
+                        "           <div class=\"mb-3\">\n" +
+                        "               <label for=\"fineCreateDesc\">Description:</label>\n" +
+                        "               <textarea class=\"form-control\" id=\"fineCreateDesc\" name=\"fineCreateDesc\" required></textarea>\n" +
+                        "           </div>\n" +
                         "      </div>\n" +
                         "      <div class=\"modal-footer\">\n" +
-                        "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
-                        "        <button type=\"button\" class=\"btn btn-primary\">Create</button>\n" +
+                        "           <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                        "           <input class=\"btn btn-primary\" type=\"submit\" value=\"Create\">\n" +
                         "      </div>\n" +
-                        "    </div>\n" +
-                        "  </div>\n" +
+                        "   </form>\n" +
                         "</div>");
         }
-        
         out.println("<table class=\"table table-hover\">");
         out.println("<thead><tr><th>Fine</th> <th>Description</th>" + (edit ? "<th></th>" : "") + "</tr></thead>");
         out.println("<tbody>");
+        
+        String editBtnHtml = "<button type=\"button me-1\" class=\"btn btn-primary\" data-bs-toggle=\"modal\" data-bs-target=\"#fineEdit%d\">Edit</button>\n" +
+                            "<a href=\"control?tab=0&page=" + request.getParameter("page") + "&emp=" + request.getParameter("emp") + "&action=1&delFine=%d\" type=\"button\" class=\"btn btn-secondary me-1\">Delete</a>\n" +
+                            "<div class=\"modal fade\" id=\"fineEdit%d\" tabindex=\"-1\">\n" +
+                            "   <form action=\"control?tab=0&page=" + request.getParameter("page") + "&emp=" + request.getParameter("emp") + "&action=1&editFine=%d\" method=\"POST\">" +
+                            "       <div class=\"modal-dialog\">\n" +
+                            "           <div class=\"modal-content\">\n" +
+                            "               <div class=\"modal-header\">\n" +
+                            "                   <h5 class=\"modal-title\">Edit fine</h5>\n" +
+                            "                   <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n" +
+                            "               </div>\n" +
+                            "           <div class=\"modal-body\">\n" +
+                            "           <div class=\"mb-3\">\n" +
+                            "               <label for=\"fineEditValue\">Fine Amount:</label>\n" +
+                            "               <input type=\"number\" class=\"form-control\" id=\"fineEditValue\" name=\"fineEditValue\" value=\"%d\" required>\n" +
+                            "           </div>\n" +
+                            "           <div class=\"mb-3\">\n" +
+                            "               <label for=\"fineEditDesc\">Description:</label>\n" +
+                            "               <textarea class=\"form-control\" id=\"fineEditDesc\" name=\"fineEditDesc\" required>%s</textarea>\n" +
+                            "           </div>\n" +
+                            "      </div>\n" +
+                            "      <div class=\"modal-footer\">\n" +
+                            "           <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                            "           <input class=\"btn btn-primary\" type=\"submit\" value=\"Save change\">\n" +
+                            "      </div>\n" +
+                            "   </form>\n" +
+                            "</div>";
         for (Fine f : fines) {
-            out.println("<tr><td>" + f.getFine() + "</td><td>" + f.getDesc() + "</td>" + (edit ? "<td>Edit</td>" : "") + "</tr>");
+            out.println("<tr><td>" + f.getFine() + "</td><td>" + f.getDesc() + "</td>" +
+                    (edit ? "<td>" + String.format(editBtnHtml, f.getId(), f.getId(), f.getId(), f.getId(), f.getFine(), f.getDesc()) + "</td>" : "") + "</tr>");
         }
         out.println("</tbody>");
         out.println("</table>");
         //log in infos
+        
+        out.println("<h4><b>Log in Info:</b></h4>");
         List<LoginInfo> loginInf = empSt.getLoginInfo();
         out.println("<table class=\"table table-hover\">");
         out.println("<thead><tr><th>Username</th> <th>Password</th>" + (edit ? "<th></th>" : "") + "</tr></thead>");
@@ -345,16 +432,20 @@ public class AdminPage extends HttpServlet {
         }
         out.println("</tbody>");
         out.println("</table>");
-        //tasks
-        List<SmallTask> tasks = empSt.getTasks();
-        out.println("<table class=\"table table-hover\">");
-        out.println("<thead><tr><th>Name</th> <th>Description</th> <th>Assesment</th></tr></thead>");
-        out.println("<tbody>");
-        for (SmallTask t : tasks) {
-            out.println("<tr><td>" + getShortDesc(t.getName()) + "</td><td>" + getShortDesc(t.getDesc()) + "</td><td>" + (t.isFinished() ? t.getMark() + "/100" : "Unfinished") + "</td></tr>");
+        
+        if (!edit) {
+            //tasks
+            List<SmallTask> tasks = empSt.getTasks();
+            out.println("<h4><b>Task:</b></h4>");
+            out.println("<table class=\"table table-hover\">");
+            out.println("<thead><tr><th>Name</th> <th>Description</th> <th>Assesment</th></tr></thead>");
+            out.println("<tbody>");
+            for (SmallTask t : tasks) {
+                out.println("<tr><td>" + getShortDesc(t.getName()) + "</td><td>" + getShortDesc(t.getDesc()) + "</td><td>" + (t.isFinished() ? t.getMark() + "/100" : "Unfinished") + "</td></tr>");
+            }
+            out.println("</tbody>");
+            out.println("</table>");
         }
-        out.println("</tbody>");
-        out.println("</table>");
     }
     private String getShortDesc(String desc) {
         if (desc.length() > 30) {
