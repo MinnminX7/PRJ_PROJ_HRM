@@ -100,6 +100,121 @@ public class AdminPage extends HttpServlet {
                     int empCount = ctrl.getEmpCount();
                     int pageCount = (empCount - (empCount % pageLen)) / pageLen + 1;
                     if (this.isParameterNullOrEmpty(request.getParameter("action")) || this.isParameterNullOrEmpty("emp")) {
+                        //add if there's "createEmp"
+                        if (!this.isParameterNullOrEmpty(request.getParameter("createEmp"))) {
+                            EmployeeStat emp = new EmployeeStat();
+                            emp.setFirstName(request.getParameter("createFName"));
+                            emp.setLastName(request.getParameter("createLName"));
+                            emp.setBirthDate(java.sql.Date.valueOf(request.getParameter("createBDate")));
+                            emp.setDepartmentID(Integer.parseInt(request.getParameter("createEmpDepartment")));
+                            emp.setPositionID(Integer.parseInt(request.getParameter("createEmpPosition")));
+                            emp.setEmail(request.getParameter("createEmpEmail"));
+                            emp.setNumber(request.getParameter("createEmpNumber"));
+                            LoginInfo l = emp.new LoginInfo (request.getParameter("createEmpUsername"), request.getParameter("createEmpPassword"));
+                            List<LoginInfo> loginInfos = new ArrayList<>();
+                            loginInfos.add(l);
+                            emp.setLoginInfo(loginInfos);
+                            emp.setBaseSal(Integer.parseInt(request.getParameter("createEmpSalary")));
+                            ctrl.addEmp(emp);
+                            response.sendRedirect("control");
+                            return;
+                        } else if (!this.isParameterNullOrEmpty(request.getParameter("deleteEmp"))) {
+                            int empID = Integer.parseInt(request.getParameter("deleteEmp"));
+                            ctrl.delEmp(empID);
+                            response.sendRedirect("control?tab=0&page=" + page);
+                            return;
+                        }
+                        //create btn
+                        List<Department> departs = ctrl.getDepartments();
+                        List<Position> posis = ctrl.getPositions();
+                        String departHtml = "", posiHtml = "";
+                        for (Department d : departs) {
+                            departHtml += String.format("<option value=\"%d\">%s</option>", d.getId(), d.getName());
+                        }
+                        for (Position p : posis) {
+                            posiHtml += String.format("<option value=\"%d\">%s</option>", p.getId(), p.getName());
+                        }
+                        out.println("<button type=\"button\" class=\"btn btn-primary my-2\" data-bs-toggle=\"modal\" data-bs-target=\"#createEmp\">\n" +
+                                    "New Employee\n" +
+                                    "</button>\n" +
+                                    "\n" +
+                                    "<div class=\"modal fade\" id=\"createEmp\" data-bs-backdrop=\"static\" data-bs-keyboard=\"false\" tabindex=\"-1\">\n" +
+                                    "  <div class=\"modal-dialog modal-lg\">\n" +
+                                    "    <div class=\"modal-content\">\n" +
+                                    "      <div class=\"modal-header\">\n" +
+                                    "        <h5 class=\"modal-title\" id=\"staticBackdropLabel\">Create new employee</h5>\n" +
+                                    "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                                    "      </div>\n" +
+                                    "     <form action=\"control?createEmp=1\" method=\"POST\">\n" +
+                                    "      <div class=\"modal-body\">\n" +
+                                    "        <div class=\"container-fluid\">\n" +
+                                    "           <div class=\"row my-2\">\n" +
+                                    "               <div class=\"col-md-4\">\n" +
+                                    "                   <label for=\"createFName\" class=\"form-label\">First Name:</label>\n" +
+                                    "                   <input type=\"text\" class=\"form-control\" id=\"createFName\" name=\"createFName\" require>\n" +
+                                    "               </div>\n" +
+                                    "               <div class=\"col-md-4\">\n" +
+                                    "                   <label for=\"createLName\" class=\"form-label\">Last Name:</label>\n" +
+                                    "                   <input type=\"text\" class=\"form-control\" id=\"createLName\" name=\"createLName\" require>\n" +
+                                    "               </div>\n" +
+                                    "               <div class=\"col-md-4\">\n" +
+                                    "                   <label for=\"createBDate\" class=\"form-label\">Birth Date:</label>\n" +
+                                    "                   <input type=\"date\" class=\"form-control\" id=\"createBDate\" name=\"createBDate\" require>\n" +
+                                    "               </div>\n" +
+                                    "           </div>\n" +
+                                    "           <div class=\"row my-2\">\n" +
+                                    "               <div class=\"col-md-6\">\n" +
+                                    "                   <label for=\"createEmpDepartment\" class=\"form-label\">Department:</label>\n" +
+                                    "                   <select class=\"form-select\" id=\"createEmpDepartment\" name=\"createEmpDepartment\">\n" +
+                                                            departHtml +
+                                    "                   </select>\n" +
+                                    "               </div>\n" +
+                                    "               <div class=\"col-md-6\">\n" +
+                                    "                   <label for=\"createEmpPosition\" class=\"form-label\">Position:</label>\n" +
+                                    "                   <select class=\"form-select\" id=\"createEmpPosition\" name=\"createEmpPosition\">\n" +
+                                                            posiHtml +
+                                    "                   </select>\n" +
+                                    "               </div>\n" +
+                                    "           </div>\n" +
+                                    "           <div class=\"row my-2\">\n" +
+                                    "               <div class=\"col-md-6\">\n" +
+                                    "                   <label for=\"createEmpEmail\" class=\"form-label\">Contract Email:</label>\n" +
+                                    "                   <input type=\"email\" class=\"form-control\" id=\"createEmpEmail\" name=\"createEmpEmail\" require>\n" +
+                                    "               </div>\n" +
+                                    "               <div class=\"col-md-6\">\n" +
+                                    "                   <label for=\"createEmpNumber\" class=\"form-label\">Contract Number:</label>\n" +
+                                    "                   <input type=\"text\" class=\"form-control\" id=\"createEmpNumber\" name=\"createEmpNumber\" require>\n" +
+                                    "               </div>\n" +
+                                    "           </div>\n" +
+                                    "           <div class=\"divider m-4\"></div>\n" +
+                                    "           <h4><b>Employee's Login Account Infomation:</b></h4>\n" +
+                                    "           <div class=\"row my-2\">\n" +
+                                    "               <div class=\"col-md-6\">\n" +
+                                    "                   <label for=\"createEmpUsername\" class=\"form-label\">Account:</label>\n" +
+                                    "                   <input type=\"text\" class=\"form-control\" id=\"createEmpUsername\" name=\"createEmpUsername\" require>\n" +
+                                    "               </div>\n" +
+                                    "               <div class=\"col-md-6\">\n" +
+                                    "                   <label for=\"createEmpPassword\" class=\"form-label\">Password:</label>\n" +
+                                    "                   <input type=\"text\" class=\"form-control\" id=\"createEmpPassword\" name=\"createEmpPassword\" require>\n" +
+                                    "               </div>\n" +
+                                    "           </div>\n" +
+                                    "           <div class=\"row my-2\">\n" +
+                                    "               <div class=\"col-md-4\">\n" +
+                                    "                   <label for=\"createEmpSalary\" class=\"form-label\">Base Salary:</label>\n" +
+                                    "                   <input type=\"number\" class=\"form-control\" id=\"createEmpSalary\" name=\"createEmpSalary\" require>\n" +
+                                    "               </div>\n" +
+                                    "           </div>\n" +
+                                    "        </div>\n" +
+                                    "      </div>\n" +
+                                    "      <div class=\"modal-footer\">\n" +
+                                    "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                                    "        <button type=\"submit\" class=\"btn btn-primary\">Create</button>\n" +
+                                    "      </div>\n" +
+                                    "     </form>\n" +
+                                    "    </div>\n" +
+                                    "  </div>\n" +
+                                    "</div>");
+                        //table
                         out.println("<thead class=\"gray\"><tr>" +
                                 "<th><a href=\"control?tab=0&sort=0\" class=\"btn grey align-l\">ID</a></th>" +
                                 "<th><a href=\"control?tab=0&sort=1\" class=\"btn grey align-l\">First Name</a></th>" +
@@ -118,7 +233,7 @@ public class AdminPage extends HttpServlet {
                             out.println("<td>" +
                                     "<a href=\"control?tab=0&page=" + page + "&emp=" + empList.indexOf(emp) + "&action=0\" role=\"button\">View</a> | " + 
                                     "<a href=\"control?tab=0&page=" + page + "&emp=" + empList.indexOf(emp) + "&action=1\" role=\"button\">Edit</a> | " +
-                                    "<a href=\"control?tab=0&page=" + page + "&emp=" + empList.indexOf(emp) + "&action=2\" role=\"button\">Delete</a>");
+                                    this.reconfirmDelEmp(emp.getID(), ctrl));
                             out.println("</tr>");
                         }
                         out.println("</tbody>");
@@ -446,6 +561,31 @@ public class AdminPage extends HttpServlet {
             out.println("</tbody>");
             out.println("</table>");
         }
+    }
+    private String reconfirmDelEmp (int empID, EmployeeCtrl ctrl) {
+        Employee e = ctrl.getEmployee(empID);
+        String empInfoHtml = String.format("<h4><b>ID: %d</br>Full name: %s</br>Position: %s</br>Department: %s</b></h4>", empID, e.getFullName(), ctrl.getPositionName(e.getPositionID()), ctrl.getDepartmentName(e.getDepartmentID()));
+        return  "<a href=\"\" data-bs-toggle=\"modal\" data-bs-target=\"#reconfirmDeleteEmp" + empID + "\">\n" +
+                "  Delete\n" +
+                "</a>\n" +
+                "<div class=\"modal fade\" id=\"reconfirmDeleteEmp" + empID + "\" tabindex=\"-1\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\" id=\"confirmTitle\">Reconfirm Employee Removal</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "           <h5>Are you sure removing this Employee ?</br></h5>\n" +
+                empInfoHtml +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Cancel</button>\n" +
+                "        <a href=\"control?deleteEmp=" + empID + "\" type=\"button\" class=\"btn btn-primary\">Confirm</a>\n" +
+                "      </div>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
     }
     private String getShortDesc(String desc) {
         if (desc.length() > 30) {

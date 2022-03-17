@@ -24,25 +24,21 @@ insert into Employee(FName, LName, BirthDate, DepartmentID, PositionID, Email, N
 
 insert into Employee(FName, LName, BirthDate, DepartmentID, PositionID, Email, Number) values
 ('Nguyen', 'Minh', '2002-07-13', 4, 4, 'minh@company.com', '0965381566');
-insert into EmployeeStatus (EmpID, Attendance, LastAttend, Strikes, Holidays) values
-(8, 8, '2022-03-08', 0, 3);
+insert into EmployeeStatus (EmpID, Attendance, LastAttend, Strikes) values
+(8, 8, '2022-03-08', 0);
 insert into LogInInfo (EmpID,Account,Password) values
-(8, 'minh', '123')
-update EmployeeStatus
-set Attendance=8,LastAttend='2022-03-08'
-where EmpID=8
-update EmployeeStatus
-set Strikes=3
-where EmpID=8
-select EmpID, COUNT(EmpID) as [count] from Employee where EmpID=8 group by EmpID
+(8, 'minh', '123');
 insert into TaskInfo (Name, [Desc], Deadline) values
-('test\n2line', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '2020-04-03 00:00:00')
+('test\n2line', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', '2020-04-03 00:00:00'),
 ('The very first Task', 'First do this.\nThen do this\nFinish it', '2020-07-13 00:00:00'),
-('The Second but longgggggggg Task', 'First do this.123444\nThen do this 568937.\n Finish it', '2022-04-01 18:00:00')
+('The Second but longgggggggg Task', 'First do this.123444\nThen do this 568937.\n Finish it', '2022-04-01 18:00:00');
 insert into StaffTask (id, EmpID, Seen, Mark) values
 (3, 8, 0, 0),
 (1, 8, 1, 70),
-(2, 8, 0, 0)
+(2, 8, 0, 0);
+insert into Fine (empid, fine, [desc]) values
+(1, 50000, 'late for work'),
+(8, 100000, 'late for assignment');
 
 insert into EmployeeStatus (EmpID, Attendance, LastAttend, Strikes) values
 (1, 8, '2022-03-08', 0),
@@ -63,6 +59,7 @@ insert into LogInInfo (EmpID,Account,Password) values
 (7, 'email7@company.com', '123456');
 
 insert into Salary (EmpID,BaseSal,Extra) values
+(8, 2000000, 50000),
 (1, 2500000, 100000),
 (2, 1000000, 0),
 (3, 1800000, 50000),

@@ -447,4 +447,64 @@ public class EmployeeCtrl extends Connector {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    public void addEmp (EmployeeStat emp) {
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            String sql_info = "INSERT INTO [Employee] (FName, LName, BirthDate, DepartmentID, PositionID, Email, Number) VALUES\n" +
+                    String.format("('%s', '%s', '%s', %d, %d, '%s', '%s')",
+                            emp.getFirstName(), emp.getLastName(), formatter.format(emp.getBirthDate()), emp.getDepartmentID(), emp.getPositionID(), emp.getEmail(), emp.getNumber());
+            connection.prepareStatement(sql_info).executeUpdate();
+            
+            int empID = -1;
+            ResultSet rs = connection.prepareStatement("SELECT IDENT_CURRENT('Employee') as id").executeQuery();
+            if (rs.next()) {
+                empID = rs.getInt("id");
+            }
+            
+            String sql_stat = "INSERT INTO [EmployeeStatus] (empid, Attendance, LastAttend, Strikes) VALUES (" + empID + ", 0, '" + LocalDate.now().toString() + "', 0)";
+            connection.prepareStatement(sql_stat).executeUpdate();
+            
+            String sql_salary = "INSERT INTO [Salary] (EmpID,BaseSal,Extra) VALUES\n" +
+                    String.format("(%d, %d, %d)",
+                            empID, emp.getBaseSal(), 0);
+            connection.prepareStatement(sql_salary).executeUpdate();
+            
+            LoginInfo l = emp.getDefaultLoginInfo();
+            String sql_login = "INSERT INTO [LogInInfo] (EmpID,Account,Password) VALUES\n" +
+                    String.format("(%d, '%s', '%s')\n",
+                                empID, l.getUsername(), l.getPassword());
+            connection.prepareStatement(sql_login).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void delEmp (int empID) {
+        try {
+            String sql_salary = "DELETE FROM [Salary]\n" +
+                    String.format("WHERE empid=%d", empID);
+            connection.prepareStatement(sql_salary).executeUpdate();
+            
+            String sql_login = "DELETE FROM [LogInInfo]\n" +
+                    String.format("WHERE empid=%d", empID);
+            connection.prepareStatement(sql_login).executeUpdate();
+            
+            String sql_fine = "DELETE FROM [Fine]\n" +
+                    String.format("WHERE empid=%d", empID);
+            connection.prepareStatement(sql_fine).executeUpdate();
+            
+            String sql_task = "DELETE FROM [StaffTask]\n" +
+                    String.format("WHERE empid=%d", empID);
+            connection.prepareStatement(sql_task).executeUpdate();
+            
+            String sql_stat = "DELETE FROM [EmployeeStatus]\n" +
+                    String.format("WHERE empid=%d", empID);
+            connection.prepareStatement(sql_stat).executeUpdate();
+            
+            String sql_main = "DELETE FROM [Employee]\n" +
+                    String.format("WHERE empid=%d", empID);
+            connection.prepareStatement(sql_main).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
