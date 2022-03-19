@@ -60,6 +60,7 @@ public class AdminPage extends HttpServlet {
                     ".divider {height: 1px;background-image: linear-gradient(to right, transparent, rgb(48,49,51), transparent);}" +
                     ".spoiler {color: black;background-color:black;}" +
                     ".spoiler:hover {background-color:white;}" +
+                    "autofit {white-space: nowrap;}" +
                     "</style>");
             out.println("<div class=\"container\">");
             out.println("<div style=\"text-align:right; position:relative;\"><a href=\"logout\">Log out</a></div>");
@@ -73,6 +74,7 @@ public class AdminPage extends HttpServlet {
             if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
                 page = Integer.max(1, Integer.parseInt(request.getParameter("page")));
             }
+            EmployeeCtrl ctrl = new EmployeeCtrl();
             switch (curTab) {
                 case 0:
                 default:
@@ -91,7 +93,6 @@ public class AdminPage extends HttpServlet {
                             "   </li>\n" +
                             "</ul>");
                     out.println("<table class=\"table table-hover\">\n");
-                    EmployeeCtrl ctrl = new EmployeeCtrl();
                     String sort = "";
                     if (request.getParameter("sort") != null) {
                         sort = request.getParameter("sort");
@@ -134,86 +135,7 @@ public class AdminPage extends HttpServlet {
                         for (Position p : posis) {
                             posiHtml += String.format("<option value=\"%d\">%s</option>", p.getId(), p.getName());
                         }
-                        out.println("<button type=\"button\" class=\"btn btn-primary my-2\" data-bs-toggle=\"modal\" data-bs-target=\"#createEmp\">\n" +
-                                    "New Employee\n" +
-                                    "</button>\n" +
-                                    "\n" +
-                                    "<div class=\"modal fade\" id=\"createEmp\" data-bs-backdrop=\"static\" data-bs-keyboard=\"false\" tabindex=\"-1\">\n" +
-                                    "  <div class=\"modal-dialog modal-lg\">\n" +
-                                    "    <div class=\"modal-content\">\n" +
-                                    "      <div class=\"modal-header\">\n" +
-                                    "        <h5 class=\"modal-title\" id=\"staticBackdropLabel\">Create new employee</h5>\n" +
-                                    "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
-                                    "      </div>\n" +
-                                    "     <form action=\"control?createEmp=1\" method=\"POST\">\n" +
-                                    "      <div class=\"modal-body\">\n" +
-                                    "        <div class=\"container-fluid\">\n" +
-                                    "           <div class=\"row my-2\">\n" +
-                                    "               <div class=\"col-md-4\">\n" +
-                                    "                   <label for=\"createFName\" class=\"form-label\">First Name:</label>\n" +
-                                    "                   <input type=\"text\" class=\"form-control\" id=\"createFName\" name=\"createFName\" require>\n" +
-                                    "               </div>\n" +
-                                    "               <div class=\"col-md-4\">\n" +
-                                    "                   <label for=\"createLName\" class=\"form-label\">Last Name:</label>\n" +
-                                    "                   <input type=\"text\" class=\"form-control\" id=\"createLName\" name=\"createLName\" require>\n" +
-                                    "               </div>\n" +
-                                    "               <div class=\"col-md-4\">\n" +
-                                    "                   <label for=\"createBDate\" class=\"form-label\">Birth Date:</label>\n" +
-                                    "                   <input type=\"date\" class=\"form-control\" id=\"createBDate\" name=\"createBDate\" require>\n" +
-                                    "               </div>\n" +
-                                    "           </div>\n" +
-                                    "           <div class=\"row my-2\">\n" +
-                                    "               <div class=\"col-md-6\">\n" +
-                                    "                   <label for=\"createEmpDepartment\" class=\"form-label\">Department:</label>\n" +
-                                    "                   <select class=\"form-select\" id=\"createEmpDepartment\" name=\"createEmpDepartment\">\n" +
-                                                            departHtml +
-                                    "                   </select>\n" +
-                                    "               </div>\n" +
-                                    "               <div class=\"col-md-6\">\n" +
-                                    "                   <label for=\"createEmpPosition\" class=\"form-label\">Position:</label>\n" +
-                                    "                   <select class=\"form-select\" id=\"createEmpPosition\" name=\"createEmpPosition\">\n" +
-                                                            posiHtml +
-                                    "                   </select>\n" +
-                                    "               </div>\n" +
-                                    "           </div>\n" +
-                                    "           <div class=\"row my-2\">\n" +
-                                    "               <div class=\"col-md-6\">\n" +
-                                    "                   <label for=\"createEmpEmail\" class=\"form-label\">Contract Email:</label>\n" +
-                                    "                   <input type=\"email\" class=\"form-control\" id=\"createEmpEmail\" name=\"createEmpEmail\" require>\n" +
-                                    "               </div>\n" +
-                                    "               <div class=\"col-md-6\">\n" +
-                                    "                   <label for=\"createEmpNumber\" class=\"form-label\">Contract Number:</label>\n" +
-                                    "                   <input type=\"text\" class=\"form-control\" id=\"createEmpNumber\" name=\"createEmpNumber\" require>\n" +
-                                    "               </div>\n" +
-                                    "           </div>\n" +
-                                    "           <div class=\"divider m-4\"></div>\n" +
-                                    "           <h4><b>Employee's Login Account Infomation:</b></h4>\n" +
-                                    "           <div class=\"row my-2\">\n" +
-                                    "               <div class=\"col-md-6\">\n" +
-                                    "                   <label for=\"createEmpUsername\" class=\"form-label\">Account:</label>\n" +
-                                    "                   <input type=\"text\" class=\"form-control\" id=\"createEmpUsername\" name=\"createEmpUsername\" require>\n" +
-                                    "               </div>\n" +
-                                    "               <div class=\"col-md-6\">\n" +
-                                    "                   <label for=\"createEmpPassword\" class=\"form-label\">Password:</label>\n" +
-                                    "                   <input type=\"text\" class=\"form-control\" id=\"createEmpPassword\" name=\"createEmpPassword\" require>\n" +
-                                    "               </div>\n" +
-                                    "           </div>\n" +
-                                    "           <div class=\"row my-2\">\n" +
-                                    "               <div class=\"col-md-4\">\n" +
-                                    "                   <label for=\"createEmpSalary\" class=\"form-label\">Base Salary:</label>\n" +
-                                    "                   <input type=\"number\" class=\"form-control\" id=\"createEmpSalary\" name=\"createEmpSalary\" require>\n" +
-                                    "               </div>\n" +
-                                    "           </div>\n" +
-                                    "        </div>\n" +
-                                    "      </div>\n" +
-                                    "      <div class=\"modal-footer\">\n" +
-                                    "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
-                                    "        <button type=\"submit\" class=\"btn btn-primary\">Create</button>\n" +
-                                    "      </div>\n" +
-                                    "     </form>\n" +
-                                    "    </div>\n" +
-                                    "  </div>\n" +
-                                    "</div>");
+                        out.println(getCreateEmpButton(departHtml, posiHtml));
                         //table
                         out.println("<thead class=\"gray\"><tr>" +
                                 "<th><a href=\"control?tab=0&sort=0\" class=\"btn grey align-l\">ID</a></th>" +
@@ -282,8 +204,8 @@ public class AdminPage extends HttpServlet {
                                 emp.setFirstName(request.getParameter("empFName"));
                                 emp.setLastName(request.getParameter("empLName"));
                                 emp.setBirthDate(java.sql.Date.valueOf(request.getParameter("empBDate")));
-                                emp.setDepartmentID(ctrl.getDepartmentID(request.getParameter("empDepartment")));
-                                emp.setPositionID(ctrl.getPositionID(request.getParameter("empPosition")));
+                                emp.setDepartmentID(Integer.parseInt(request.getParameter("empDepartment")));
+                                emp.setPositionID(Integer.parseInt(request.getParameter("empPosition")));
                                 emp.setEmail(request.getParameter("empEmail"));
                                 emp.setNumber(request.getParameter("empNumber"));
                                 emp.setStrikes(Integer.parseInt(request.getParameter("empStrikes")));
@@ -333,6 +255,21 @@ public class AdminPage extends HttpServlet {
                             "       <a class=\"nav-link\" href=\"control?tab=3\">Position</a>\n" +
                             "   </li>\n" +
                             "</ul>");
+                    List<Department> departs = ctrl.getDepartments();
+                    String tbRows = "";
+                    for (Department d : departs) {
+                        tbRows += String.format("<tr><td>%d</td> <td>%s</td></tr>", d.getId(), d.getName());
+                    }
+                    out.println("<table class=\"table table-striped table-hover\">\n" +
+                                "   <thead>\n" +
+                                "       <tr>\n" +
+                                "           <th autofit>ID</th> <th autofit>Department's name</th> <th autofit>Action</th>\n" +
+                                "       </tr>\n" +
+                                "   </thead>\n" +
+                                "   <tbody>\n" +
+                                tbRows +
+                                "   </tbody>\n" +
+                                "</table>");
                     break;
                 case 3:
                     out.println("<ul class=\"nav nav-tabs\">\n" +
@@ -366,6 +303,89 @@ public class AdminPage extends HttpServlet {
             out.println("</html>");
             
         }
+    }
+
+    private static String getCreateEmpButton(String departHtml, String posiHtml) {
+        return "<button type=\"button\" class=\"btn btn-primary my-2\" data-bs-toggle=\"modal\" data-bs-target=\"#createEmp\">\n" +
+                "New Employee\n" +
+                "</button>\n" +
+                "\n" +
+                "<div class=\"modal fade\" id=\"createEmp\" data-bs-backdrop=\"static\" data-bs-keyboard=\"false\" tabindex=\"-1\">\n" +
+                "  <div class=\"modal-dialog modal-lg\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\" id=\"staticBackdropLabel\">Create new employee</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "     <form action=\"control?createEmp=1\" method=\"POST\">\n" +
+                "      <div class=\"modal-body\">\n" +
+                "        <div class=\"container-fluid\">\n" +
+                "           <div class=\"row my-2\">\n" +
+                "               <div class=\"col-md-4\">\n" +
+                "                   <label for=\"createFName\" class=\"form-label\">First Name:</label>\n" +
+                "                   <input type=\"text\" class=\"form-control\" id=\"createFName\" name=\"createFName\" require>\n" +
+                "               </div>\n" +
+                "               <div class=\"col-md-4\">\n" +
+                "                   <label for=\"createLName\" class=\"form-label\">Last Name:</label>\n" +
+                "                   <input type=\"text\" class=\"form-control\" id=\"createLName\" name=\"createLName\" require>\n" +
+                "               </div>\n" +
+                "               <div class=\"col-md-4\">\n" +
+                "                   <label for=\"createBDate\" class=\"form-label\">Birth Date:</label>\n" +
+                "                   <input type=\"date\" class=\"form-control\" id=\"createBDate\" name=\"createBDate\" require>\n" +
+                "               </div>\n" +
+                "           </div>\n" +
+                "           <div class=\"row my-2\">\n" +
+                "               <div class=\"col-md-6\">\n" +
+                "                   <label for=\"createEmpDepartment\" class=\"form-label\">Department:</label>\n" +
+                "                   <select class=\"form-select\" id=\"createEmpDepartment\" name=\"createEmpDepartment\">\n" +
+                departHtml +
+                "                   </select>\n" +
+                "               </div>\n" +
+                "               <div class=\"col-md-6\">\n" +
+                "                   <label for=\"createEmpPosition\" class=\"form-label\">Position:</label>\n" +
+                "                   <select class=\"form-select\" id=\"createEmpPosition\" name=\"createEmpPosition\">\n" +
+                posiHtml +
+                "                   </select>\n" +
+                "               </div>\n" +
+                "           </div>\n" +
+                "           <div class=\"row my-2\">\n" +
+                "               <div class=\"col-md-6\">\n" +
+                "                   <label for=\"createEmpEmail\" class=\"form-label\">Contract Email:</label>\n" +
+                "                   <input type=\"email\" class=\"form-control\" id=\"createEmpEmail\" name=\"createEmpEmail\" require>\n" +
+                "               </div>\n" +
+                "               <div class=\"col-md-6\">\n" +
+                "                   <label for=\"createEmpNumber\" class=\"form-label\">Contract Number:</label>\n" +
+                "                   <input type=\"text\" class=\"form-control\" id=\"createEmpNumber\" name=\"createEmpNumber\" require>\n" +
+                "               </div>\n" +
+                "           </div>\n" +
+                "           <div class=\"divider m-4\"></div>\n" +
+                "           <h4><b>Employee's Login Account Infomation:</b></h4>\n" +
+                "           <div class=\"row my-2\">\n" +
+                "               <div class=\"col-md-6\">\n" +
+                "                   <label for=\"createEmpUsername\" class=\"form-label\">Account:</label>\n" +
+                "                   <input type=\"text\" class=\"form-control\" id=\"createEmpUsername\" name=\"createEmpUsername\" require>\n" +
+                "               </div>\n" +
+                "               <div class=\"col-md-6\">\n" +
+                "                   <label for=\"createEmpPassword\" class=\"form-label\">Password:</label>\n" +
+                "                   <input type=\"text\" class=\"form-control\" id=\"createEmpPassword\" name=\"createEmpPassword\" require>\n" +
+                "               </div>\n" +
+                "           </div>\n" +
+                "           <div class=\"row my-2\">\n" +
+                "               <div class=\"col-md-4\">\n" +
+                "                   <label for=\"createEmpSalary\" class=\"form-label\">Base Salary:</label>\n" +
+                "                   <input type=\"number\" class=\"form-control\" id=\"createEmpSalary\" name=\"createEmpSalary\" require>\n" +
+                "               </div>\n" +
+                "           </div>\n" +
+                "        </div>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Create</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
     }
 
     private void EmpViewNEdit(final PrintWriter out, HttpServletRequest request, EmployeeStat empSt, EmployeeCtrl ctrl, boolean edit) {
@@ -404,7 +424,7 @@ public class AdminPage extends HttpServlet {
                 "   <select class=\"form-select\" name=\"empDepartment\" id=\"departmentPick\"" + (!edit ? " disabled" : "") + ">\n");
         List<Department> departments = ctrl.getDepartments();
         for (Department d : departments) {
-            out.println("<option" + (d.getId() == empSt.getDepartmentID() ? " selected" : "") + ">" + d.getName() + "</option>\n");
+            out.println("<option" + (d.getId() == empSt.getDepartmentID() ? " selected" : "") + " value=\"" + d.getId() + "\">" + d.getName() + "</option>\n");
         }
         out.println("   </select>\n" +
                 "</div>");
@@ -413,7 +433,7 @@ public class AdminPage extends HttpServlet {
                 "   <select class=\"form-select\" name=\"empPosition\" id=\"positionPick\"" + (!edit ? " disabled" : "") + ">\n");
         List<Position> positions = ctrl.getPositions();
         for (Position p : positions) {
-            out.println("<option" + (p.getId() == empSt.getPositionID()? " selected" : "") + ">" + p.getName() + "</option>\n");
+            out.println("<option" + (p.getId() == empSt.getPositionID()? " selected" : "") + " value=\"" + p.getId() + "\">" + p.getName() + "</option>\n");
         }
         out.println("   </select>\n" +
                 "</div>");

@@ -3,11 +3,11 @@ create database HRManagement;
 go
 use HRManagement;
 create table Department (
-	DepartmentID int primary key,
+	DepartmentID int identity(1,1) primary key,
 	Name nvarchar(32)
 );
 create table Position (
-	PositionID int primary key,
+	PositionID int identity(1,1) primary key,
 	Name nvarchar(32)
 );
 create table Employee (

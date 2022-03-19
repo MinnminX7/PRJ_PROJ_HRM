@@ -507,4 +507,58 @@ public class EmployeeCtrl extends Connector {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    public int countEmpWithDepart (int departID) {
+        try {
+            String sql = "SELECT COUNT([DepartmentID]) as 'count'\n" +
+                    "  FROM [Employee]\n" +
+                    "  WHERE [DepartmentID]=" + departID +
+                    "  GROUP BY [DepartmentID]";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("count");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    public int countEmpWithPosi (int posiID) {
+        try {
+            String sql = "SELECT COUNT([PositionID]) as 'count'\n" +
+                    "  FROM [Employee]\n" +
+                    "  WHERE [PositionID]=" + posiID +
+                    "  GROUP BY [PositionID]";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("count");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    public void editDepartment (int id, String name) {
+        try {
+            String sql = "UPDATE [Department]\n" +
+                    String.format("SET [Name]=%s\n", name) +
+                    String.format("WHERE [DepartmentID]=%d", id);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void editPosition (int id, String name) {
+        try {
+            String sql = "UPDATE [Department]\n" +
+                    String.format("SET [Name]=%s\n", name) +
+                    String.format("WHERE [DepartmentID]=%d", id);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

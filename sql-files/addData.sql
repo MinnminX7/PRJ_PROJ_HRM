@@ -1,17 +1,17 @@
 use HRManagement;
 
-insert into Department(DepartmentID, Name) values
-(1, 'Administration/operations'),
-(2, 'Marketing'),
-(3, 'Customer service'),
-(4, 'Designing'),
-(5, 'Accounting');
+insert into Department(Name) values
+('Administration/operations'),
+('Marketing'),
+('Customer service'),
+('Designing'),
+('Accounting');
 
-insert into Position(PositionID, Name) values
-(1, 'Department Manager'),
-(2, 'Manager''s Secretary'),
-(3, 'Senior/Mentor'),
-(4, 'Staff');
+insert into Position(Name) values
+('Department Manager'),
+('Manager''s Secretary'),
+('Senior/Mentor'),
+('Staff');
 
 insert into Employee(FName, LName, BirthDate, DepartmentID, PositionID, Email, Number) values
 ('Colby', 'Guerra', '1992-04-13', 2, 1, 'email1@company.com', '094875898'),
