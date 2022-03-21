@@ -544,19 +544,65 @@ public class EmployeeCtrl extends Connector {
     public void editDepartment (int id, String name) {
         try {
             String sql = "UPDATE [Department]\n" +
-                    String.format("SET [Name]=%s\n", name) +
+                    String.format("SET [Name]='%s'\n", name) +
                     String.format("WHERE [DepartmentID]=%d", id);
             connection.prepareStatement(sql).executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    public void createDepart(String name) {
+        try {
+            String sql = "INSERT INTO [Department] (Name) VALUES\n" +
+                    String.format("('%s')\n", name);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void deleteDepart(int id, int replaceId) {
+        try {
+            String sql_replace = "UPDATE [Employee]\n" +
+                    String.format("SET [DepartmentId]=%d\n", replaceId) +
+                    String.format("WHERE [DepartmentID]=%d", id);
+            connection.prepareStatement(sql_replace).executeUpdate();
+            
+            String sql_delete = "DELETE FROM [Department]\n" +
+                    String.format("WHERE [DepartmentID]=%d", id);
+            connection.prepareStatement(sql_delete).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     public void editPosition (int id, String name) {
         try {
-            String sql = "UPDATE [Department]\n" +
-                    String.format("SET [Name]=%s\n", name) +
-                    String.format("WHERE [DepartmentID]=%d", id);
+            String sql = "UPDATE [Position]\n" +
+                    String.format("SET [Name]='%s'\n", name) +
+                    String.format("WHERE [PositionID]=%d", id);
             connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void createPosi(String name) {
+        try {
+            String sql = "INSERT INTO [Position] (Name) VALUES\n" +
+                    String.format("('%s')\n", name);
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void deletePosi(int id, int replaceId) {
+        try {
+            String sql_replace = "UPDATE [Employee]\n" +
+                    String.format("SET [PositionID]=%d\n", replaceId) +
+                    String.format("WHERE [PositionID]=%d", id);
+            connection.prepareStatement(sql_replace).executeUpdate();
+            
+            String sql_delete = "DELETE FROM [Position]\n" +
+                    String.format("WHERE [PositionID]=%d", id);
+            connection.prepareStatement(sql_delete).executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }

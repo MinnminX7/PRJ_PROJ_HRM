@@ -24,6 +24,14 @@
         <servlet-name>LogoutServlet</servlet-name>
         <servlet-class>Controller.LogoutServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DepartmentCtrl</servlet-name>
+        <servlet-class>Controller.DepartmentCtrl</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PositionCtrl</servlet-name>
+        <servlet-class>Controller.PositionCtrl</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>MainPage</servlet-name>
         <url-pattern>/MainPage</url-pattern>
@@ -43,6 +51,14 @@
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentCtrl</servlet-name>
+        <url-pattern>/DepartmentCtrl</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PositionCtrl</servlet-name>
+        <url-pattern>/PositionCtrl</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

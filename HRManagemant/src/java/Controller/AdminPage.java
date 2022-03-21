@@ -255,10 +255,13 @@ public class AdminPage extends HttpServlet {
                             "       <a class=\"nav-link\" href=\"control?tab=3\">Position</a>\n" +
                             "   </li>\n" +
                             "</ul>");
+                    out.println(getCreateDepartButton());
                     List<Department> departs = ctrl.getDepartments();
                     String tbRows = "";
                     for (Department d : departs) {
-                        tbRows += String.format("<tr><td>%d</td> <td>%s</td></tr>", d.getId(), d.getName());
+                        tbRows += String.format("<tr><td>%d</td> <td>%s</td> <td>%s</td></tr>", d.getId(), d.getName(), 
+                                "<button class=\"btn\" data-bs-toggle=\"modal\" data-bs-target=\"#editDepartment" + d.getId() + "\">Edit</button>" + getEditDepartButton(d) +
+                                "<button class=\"btn btn-danger\" data-bs-toggle=\"modal\" data-bs-target=\"#deleteDepart" + d.getId() + "\">Delete</button>" + getDeleteDepartButton(d, departs));
                     }
                     out.println("<table class=\"table table-striped table-hover\">\n" +
                                 "   <thead>\n" +
@@ -268,6 +271,7 @@ public class AdminPage extends HttpServlet {
                                 "   </thead>\n" +
                                 "   <tbody>\n" +
                                 tbRows +
+                                
                                 "   </tbody>\n" +
                                 "</table>");
                     break;
@@ -286,6 +290,26 @@ public class AdminPage extends HttpServlet {
                             "       <a class=\"nav-link active\" href=\"control?tab=3\">Position</a>\n" +
                             "   </li>\n" +
                             "</ul>");
+                    //same as department tab
+                    out.println(getCreatePosiButton());
+                    List<Position> posis = ctrl.getPositions();
+                    String tbRows2 = "";
+                    for (Position p : posis) {
+                        tbRows2 += String.format("<tr><td>%d</td> <td>%s</td> <td>%s</td></tr>", p.getId(), p.getName(), 
+                                "<button class=\"btn\" data-bs-toggle=\"modal\" data-bs-target=\"#editPosi" + p.getId() + "\">Edit</button>" + getEditPosiButton(p) +
+                                "<button class=\"btn btn-danger\" data-bs-toggle=\"modal\" data-bs-target=\"#deletePosi" + p.getId() + "\">Delete</button>" + getDeletePosiButton(p, posis));
+                    }
+                    out.println("<table class=\"table table-striped table-hover\">\n" +
+                                "   <thead>\n" +
+                                "       <tr>\n" +
+                                "           <th autofit>ID</th> <th autofit>Position's name</th> <th autofit>Action</th>\n" +
+                                "       </tr>\n" +
+                                "   </thead>\n" +
+                                "   <tbody>\n" +
+                                tbRows2 +
+                                
+                                "   </tbody>\n" +
+                                "</table>");
                     break;
             }
             out.println("</div>");
@@ -304,7 +328,159 @@ public class AdminPage extends HttpServlet {
             
         }
     }
-
+    private static String getDeletePosiButton(Position p, List<Position> allPosi) {
+        String options = "";
+        for (Position po : allPosi) {
+            options += String.format("<option value=\"%d\">%s</option>", po.getId(), po.getName());
+        }
+        return  "<div class=\"modal fade\" id=\"deletePosi" + p.getId() + "\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "     <form action=\"PositionCtrl?mode=2&id=" + p.getId() + "\" method=\"POST\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\">Delete Position</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "         <label for=\"replaceDeletedPosi\" class=\"form-label\"><b>Delete Position will cause some data missing to the database!</b></br>Please choose a Position to replace:</label>\n" +
+                "         <select class=\"form-select\" id=\"replaceDeletedPosi\" name=\"replaceId\">\n" +
+                options +
+                "         </select>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Delete</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
+    }
+    private static String getCreatePosiButton() {
+        return  "<button type=\"button\" class=\"btn btn-primary my-2\" data-bs-toggle=\"modal\" data-bs-target=\"#createPosition\">\n" +
+                "New Position\n" +
+                "</button>\n" +
+                "\n" +
+                "<div class=\"modal fade\" id=\"createPosition\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "     <form action=\"PositionCtrl?mode=0\" method=\"POST\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\">Create new Position</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "           <label for=\"inpNewPosition\" class=\"form-label\">Enter new Position's name:</label>\n" +
+                "           <input type=\"text\" class=\"form-control\" name=\"name\" id=\"inpNewPosition\">" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Create</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
+    }
+    private static String getEditPosiButton(Position p) {
+        return  "<div class=\"modal fade\" id=\"editPosi" + p.getId() + "\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "     <form action=\"PositionCtrl?mode=1&id=" + p.getId() + "\" method=\"POST\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\">Edit position</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "               <label for=\"editPositionName\" class=\"form-label\">Change Position name to:</label>\n" +
+                "               <input type=\"text\" class=\"form-control\" name=\"name\" id=\"editPositionName\" value=\"" + p.getName() + "\">" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Save changes</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
+    }
+    
+    private static String getDeleteDepartButton(Department d, List<Department> allDepart) {
+        String options = "";
+        for (Department de : allDepart) {
+            options += String.format("<option value=\"%d\">%s</option>", de.getId(), de.getName());
+        }
+        return  "<div class=\"modal fade\" id=\"deleteDepart" + d.getId() + "\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "     <form action=\"DepartmentCtrl?mode=2&id=" + d.getId() + "\" method=\"POST\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\" id=\"exampleModalLabel\">Delete Department</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "         <label for=\"replaceDeletedDepart\" class=\"form-label\"><b>Delete Department will cause some data missing to the database!</b></br>Please choose a Department to replace:</label>\n" +
+                "         <select class=\"form-select\" id=\"replaceDeletedDepart\" name=\"replaceId\">\n" +
+                options +
+                "         </select>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Delete</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
+    }
+    private static String getCreateDepartButton() {
+        return  "<button type=\"button\" class=\"btn btn-primary my-2\" data-bs-toggle=\"modal\" data-bs-target=\"#createDepartment\">\n" +
+                "New Department\n" +
+                "</button>\n" +
+                "\n" +
+                "<div class=\"modal fade\" id=\"createDepartment\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "     <form action=\"DepartmentCtrl?mode=0\" method=\"POST\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\">Create new Department</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "           <label for=\"inpNewDepart\" class=\"form-label\">Enter new Department's name:</label>\n" +
+                "           <input type=\"text\" class=\"form-control\" name=\"name\" id=\"inpNewDepart\">" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Create</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
+    }
+    private static String getEditDepartButton(Department d) {
+        return  "<div class=\"modal fade\" id=\"editDepartment" + d.getId() + "\">\n" +
+                "  <div class=\"modal-dialog\">\n" +
+                "    <div class=\"modal-content\">\n" +
+                "     <form action=\"DepartmentCtrl?mode=1&id=" + d.getId() + "\" method=\"POST\">\n" +
+                "      <div class=\"modal-header\">\n" +
+                "        <h5 class=\"modal-title\">Edit department</h5>\n" +
+                "        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>\n" +
+                "      </div>\n" +
+                "      <div class=\"modal-body\">\n" +
+                "               <label for=\"editDepartmentName\" class=\"form-label\">Change Department name to:</label>\n" +
+                "               <input type=\"text\" class=\"form-control\" name=\"name\" id=\"editDepartmentName\" value=\"" + d.getName() + "\">" +
+                "      </div>\n" +
+                "      <div class=\"modal-footer\">\n" +
+                "        <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Close</button>\n" +
+                "        <button type=\"submit\" class=\"btn btn-primary\">Save changes</button>\n" +
+                "      </div>\n" +
+                "     </form>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</div>";
+    }
     private static String getCreateEmpButton(String departHtml, String posiHtml) {
         return "<button type=\"button\" class=\"btn btn-primary my-2\" data-bs-toggle=\"modal\" data-bs-target=\"#createEmp\">\n" +
                 "New Employee\n" +
@@ -358,6 +534,12 @@ public class AdminPage extends HttpServlet {
                 "                   <input type=\"text\" class=\"form-control\" id=\"createEmpNumber\" name=\"createEmpNumber\" require>\n" +
                 "               </div>\n" +
                 "           </div>\n" +
+                "           <div class=\"row my-2\">\n" +
+                "               <div class=\"col-md-4\">\n" +
+                "                   <label for=\"createEmpSalary\" class=\"form-label\">Base Salary:</label>\n" +
+                "                   <input type=\"number\" class=\"form-control\" id=\"createEmpSalary\" name=\"createEmpSalary\" require>\n" +
+                "               </div>\n" +
+                "           </div>\n" +
                 "           <div class=\"divider m-4\"></div>\n" +
                 "           <h4><b>Employee's Login Account Infomation:</b></h4>\n" +
                 "           <div class=\"row my-2\">\n" +
@@ -368,12 +550,6 @@ public class AdminPage extends HttpServlet {
                 "               <div class=\"col-md-6\">\n" +
                 "                   <label for=\"createEmpPassword\" class=\"form-label\">Password:</label>\n" +
                 "                   <input type=\"text\" class=\"form-control\" id=\"createEmpPassword\" name=\"createEmpPassword\" require>\n" +
-                "               </div>\n" +
-                "           </div>\n" +
-                "           <div class=\"row my-2\">\n" +
-                "               <div class=\"col-md-4\">\n" +
-                "                   <label for=\"createEmpSalary\" class=\"form-label\">Base Salary:</label>\n" +
-                "                   <input type=\"number\" class=\"form-control\" id=\"createEmpSalary\" name=\"createEmpSalary\" require>\n" +
                 "               </div>\n" +
                 "           </div>\n" +
                 "        </div>\n" +

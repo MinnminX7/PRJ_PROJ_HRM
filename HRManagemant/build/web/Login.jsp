@@ -41,7 +41,7 @@
                     out.println("<div class=\"alert alert-danger custom-text custom-width\" role=\"alert\">" + error + "</div>");
                 }
             %>
-            <form action="MainPage">
+            <form action="MainPage" method="POST">
                 <div class="row mt-1 custom-text custom-width">
                     <label for="usernameInput" class="form-label">Username / Email:</label>
                     <input type="text" class="form-control" id="usernameInput" name="username">
