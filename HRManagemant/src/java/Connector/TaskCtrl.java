@@ -126,6 +126,7 @@ public class TaskCtrl extends Connector {
                         "FROM [Employee] e JOIN [StaffTask] s ON e.EmpID=s.EmpID\n" + 
                         "WHERE e.[DepartmentID]=" + departId;
             ResultSet rs = connection.prepareStatement(sql_getEmp).executeQuery();
+            
             String sql_task =   "SELECT DISTINCT ti.id, ti.Name, ti.[Desc], ti.Deadline, st.Seen, st.Mark FROM [TaskInfo] ti JOIN [StaffTask] st ON ti.id = st.id\n" +
                                 "WHERE ti.id=%d";
             String sql_member = "SELECT e.EmpID, e.FName, e.LName, e.Email, e.Number FROM [Employee] e JOIN [StaffTask] st ON e.EmpID=st.EmpID\n" +
@@ -133,7 +134,7 @@ public class TaskCtrl extends Connector {
             while (rs.next()) {
                 Task t = new Task();
                 t.setId(rs.getInt("ID"));
-                ResultSet rsTask = connection.prepareStatement(String.format(sql_task, t.getId())).executeQuery();
+                ResultSet rsTask = connection.prepareStatement(String.format(sql_task, rs.getInt("ID"))).executeQuery();
                 t.setName(rsTask.getString("Name").replace("\\n", "\n").replace("\\t", "\t"));
                 t.setDesc(rsTask.getString("Desc").replace("\\n", "\n").replace("\\t", "\t"));
                 t.setDeadline(rsTask.getTimestamp("Deadline").toLocalDateTime());
@@ -282,6 +283,21 @@ public class TaskCtrl extends Connector {
                             String.format("(%d, %s, 0, 0)", id, mid);
                 connection.prepareStatement(sql2).executeUpdate();
             }
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void deleteTask(int id) {
+        try {
+            String sql1 =    "DELETE FROM StaffTask\n" +
+                            "WHERE [id]=" + id;
+            connection.prepareStatement(sql1).executeUpdate();
+            
+            connection.prepareStatement("DELETE FROM StaffTask WHERE id=" + id).executeUpdate();
+           
+            String sql2 =    "DELETE FROM TaskInfo\n" +
+                            "WHERE [id]=" + id;
+            connection.prepareStatement(sql2).executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(TaskCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }

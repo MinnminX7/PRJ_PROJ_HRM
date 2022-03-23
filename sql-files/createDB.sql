@@ -18,7 +18,8 @@ create table Employee (
 	DepartmentID int foreign key references Department(DepartmentID),
 	PositionID int foreign key references Position(PositionID),
 	Email nvarchar(32),
-	Number nvarchar(12)
+	Number nvarchar(12),
+	Holidays int default 0
 );
 
 create table EmployeeStatus (

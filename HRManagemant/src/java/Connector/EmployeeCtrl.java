@@ -37,6 +37,7 @@ public class EmployeeCtrl extends Connector {
                     "      ,[birthdate]\n" +
                     "      ,[departmentid]\n" +
                     "      ,[positionid]\n" +
+                    "      ,[holidays]\n" +
                     "      ,[email]\n" +
                     "      ,[number]\n" +
                     "  FROM [Employee]\n" +
@@ -55,6 +56,7 @@ public class EmployeeCtrl extends Connector {
                         rs.getString("email"),
                         rs.getString("number")
                 );
+                e.setHolidays(rs.getInt("holidays"));
                 return e;
             }
         } catch (SQLException ex) {
@@ -79,6 +81,33 @@ public class EmployeeCtrl extends Connector {
             Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
         return Date.valueOf(LocalDate.now());
+    }
+    public int getHolidayNum(int empID) {
+        try {
+            String sql = "SELECT [empid]\n" +
+                    "      ,[holidays]\n" +
+                    "  FROM [Employee]\n" +
+                    "  WHERE [empid]=" + empID;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next())
+            {
+                return rs.getInt("holidays");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    public void updateHolidayNum(int empID, int value) {
+        try {
+            String sql = "UPDATE [Employee]\n" +
+                    "  SET [holidays]=" + value + "\n" +
+                    "  WHERE [empid]=" + empID;
+            connection.prepareStatement(sql).executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(EmployeeCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     public int getAttendance(int empID) {
         try {
@@ -180,6 +209,7 @@ public class EmployeeCtrl extends Connector {
                     "      ,e.[birthdate]\n" +
                     "      ,e.[departmentid]\n" +
                     "      ,e.[positionid]\n" +
+                    "      ,e.[holidays]\n" +
                     "      ,e.[email]\n" +
                     "      ,e.[number]\n" +
                     "      ,es.[Attendance]\n" +
@@ -203,6 +233,7 @@ public class EmployeeCtrl extends Connector {
                 e.setDepartmentID(rs.getInt("departmentid"));
                 e.setPositionID(rs.getInt("positionid"));
                 e.setEmail(rs.getString("email"));
+                e.setHolidays(rs.getInt("holidays"));
                 e.setNumber(rs.getString("number"));
                 e.setAttendance(rs.getInt("Attendance"));
                 e.setLastAttend(rs.getDate("LastAttend").toLocalDate());
@@ -427,8 +458,8 @@ public class EmployeeCtrl extends Connector {
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             String sql_info = "UPDATE [Employee]\n" +
-                    String.format("SET [lname]='%s', [fname]='%s', [birthdate]='%s', [DepartmentID]=%d, [PositionID]=%d, [email]='%s', [number]='%s'\n",
-                            emp.getLastName(), emp.getFirstName(), formatter.format(emp.getBirthDate()), emp.getDepartmentID(), emp.getPositionID(), emp.getEmail(), emp.getNumber()) +
+                    String.format("SET [lname]='%s', [fname]='%s', [birthdate]='%s', [DepartmentID]=%d, [PositionID]=%d, [email]='%s', [number]='%s', [holidays]=%d\n",
+                            emp.getLastName(), emp.getFirstName(), formatter.format(emp.getBirthDate()), emp.getDepartmentID(), emp.getPositionID(), emp.getEmail(), emp.getNumber(), emp.getHolidays()) +
                     String.format("WHERE [empid]=%d;", emp.getID());
             connection.prepareStatement(sql_info).executeUpdate();
             

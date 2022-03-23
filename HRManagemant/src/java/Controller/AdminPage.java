@@ -213,6 +213,7 @@ public class AdminPage extends HttpServlet {
                                 emp.setLastAttend(LocalDate.now());
                                 emp.setBaseSal(Integer.parseInt(request.getParameter("empSal")));
                                 emp.setExtra(Integer.parseInt(request.getParameter("empExtra")));
+                                emp.setHolidays(Integer.parseInt(request.getParameter("empHolidays")));
                                 ctrl.updateEmpStat(emp);
                                 response.sendRedirect("control?tab=0&page=" + page + "&emp=" + empid + "&action=0");
                                 return;
@@ -240,6 +241,9 @@ public class AdminPage extends HttpServlet {
                             "   </li>\n" +
                             "</ul>");
                     TaskHtmlCtrl taskCtrl = new TaskHtmlCtrl();
+                    out.println("<a href=\"editTask\" type=\"button\" class=\"btn btn-primary my-2\">\n" +
+                                "New Task\n" +
+                                "</a>\n");
                     out.println(taskCtrl.getTableOfTask(taskCtrl.getAllTask()));
                     break;
                 case 2:
@@ -640,9 +644,14 @@ public class AdminPage extends HttpServlet {
                 "   <input type=\"number\" name=\"empStrikes\" class=\"form-control\" value=\"" + empSt.getStrikes() + "\"" + (!edit ? " readonly" : "") + ">\n" +
                         "</div></div>");
         int maxAttend = LocalDate.now().getDayOfMonth();
-        out.println("<div class=\"col-auto ms-2\"><label for=\"attendance\" id=\"attendStat\">Attended: " + empSt.getAttendance() + ", Missed: " + (maxAttend - empSt.getAttendance()) +"</label><i> (Last attendance in " + LocalDate.now().toString() + ")</i>\n" +
+        out.println("<div class=\"col-sm-4 ms-2\"><label for=\"attendance\" id=\"attendStat\">Attended: " + empSt.getAttendance() + ", Missed: " + (maxAttend - empSt.getAttendance()) +"</label><i> (Last attendance in " + LocalDate.now().toString() + ")</i>\n" +
                 "<input type=\"range\" name=\"empAttend\" class=\"form-range\" min=\"0\" max=\"" + maxAttend + "\" value=\"" + empSt.getAttendance() + "\" step=\"1\" id=\"attendance\"" + (!edit ? " disabled" : "") + " onInput=\"updateAttend()\">");
-        out.println("</div></div>");
+        out.println("</div>");
+        out.println("<div class=\"col-sm-2 me-2\"><div class=\"input-group\">\n" +
+                "   <label class=\"input-group-text\">Holiday</label>\n" +
+                "   <input type=\"number\" name=\"empHolidays\" class=\"form-control\" value=\"" + empSt.getHolidays() + "\"" + (!edit ? " readonly" : "") + ">\n" +
+                        "</div></div>");
+        out.println("</div>");
         //salary
         out.println("<div class=\"row mt-4 mb-4\">");
         out.println("<div class=\"col me-2\">");

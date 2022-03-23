@@ -93,12 +93,13 @@ public class MainPage extends HttpServlet {
                             "       <a class=\"nav-link active\" href=\"MainPage?tab=0\">Status</a>\n" +
                             "   </li>\n" +
                             "   <li class=\"nav-item\">\n" +
-                            "       <a class=\"nav-link\" href=\"MainPage?tab=1\">Task" + unseenNumNotif + "</a>\n" +
+                            "       <a class=\"nav-link\" href=\"MainPage?tab=1\">Task" + (me.getPositionID() == 1 ? " Manager" : "") + unseenNumNotif + "</a>\n" +
                             "   </li>\n" +
                             "</ul>");
                 out.println("<div class=\"status\">Name:   " + me.getFullName() + "</div>");
                 out.println("<div class=\"status\">Department:   " + control.getDepartmentName(me.getDepartmentID()) + "</div>");
                 out.println("<div class=\"status\">Position:   " + control.getPositionName(me.getPositionID()) + "</div>");
+                out.println("<div class=\"status\">Holidays:   " + me.getHolidays() + "</div>");
                 LocalDate lastattend = control.getLastAttendance(me.getID()).toLocalDate();
                 int monthLen = LocalDate.now().lengthOfMonth();
                 int attended = control.getAttendance(me.getID()) * 100 / monthLen;
@@ -138,65 +139,73 @@ public class MainPage extends HttpServlet {
                             "       <a class=\"nav-link\" href=\"MainPage?tab=0\">Status</a>\n" +
                             "   </li>\n" +
                             "   <li class=\"nav-item\">\n" +
-                            "       <a class=\"nav-link active\" href=\"MainPage?tab=1\">Task" + unseenNumNotif + "</a>\n" +
+                            "       <a class=\"nav-link active\" href=\"MainPage?tab=1\">Task" + (me.getPositionID() == 1 ? " Manager" : "") + unseenNumNotif + "</a>\n" +
                             "   </li>\n" +
                             "</ul>");
-                int page = 1;
-                if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
-                    page = Integer.max(1, Integer.parseInt(request.getParameter("page")));
-                }
-                int taskCount = taskCtrl.getTaskCount(me.getID());
-                int pageLen = 5;
-                int pageCount = (taskCount - (taskCount % pageLen)) / pageLen + 1;
-                List<Task> tasks = taskCtrl.getTasks(me.getID(), page-1, pageLen);
-                if (request.getParameter("task") != null && !request.getParameter("task").isEmpty()) {
-                    int taskIndex = Integer.parseInt(request.getParameter("task"));
-                    Task task = tasks.get(taskIndex);
-                    if (!task.isSeen()) {
-                        taskCtrl.sawTask(me.getID(), task.getId());
-                        task.setSeen(true);
-                    }
-                    out.println("<div class=\"card mt-2 mb-2\">");
-                    out.println("<div class=\"card-header row\">" +
-                            "<div class=\"col-auto\"><a href=\"MainPage?tab=1&page=" + page + "\"><img class=\"back me-2\" src=\"resources/img/arrow-left-square.svg\" width=\"32\" height=\"32\"></a></div>" +
-                            "<div class=\"col my-auto\">" + toHtmlString(task.getName()) + "</div></div>");
-                    out.println("<div class=\"card-body\">Deadline: " + task.getDeadline().toString() + "</div>");
-                    out.println("<div class=\"card-body\">" + toHtmlString(task.getDesc()) + "</div>");
-                    out.println("<div class=\"card-body\">Member: </br>");
-                    for (int i = 0; i < task.getAssignedEmp().size(); i++) {
-                        out.println(" - " + task.getAssignedEmp().get(i).toString(false) + "</br>");
-                    }
-                    out.println("</div>");
-                    out.println("</div>");
-                    //assesment
-                    if (task.getDeadline().isBefore(LocalDateTime.now())) {
-                        out.println("<div class=\"alert alert-primary big-alert\">");
-                        out.println("Assessment: " + task.getAssesment() + "/100");
-                        out.println("</div>");
-                    }
+                if (me.getPositionID() == 1) {
+                    TaskHtmlCtrl taskMngCtrl = new TaskHtmlCtrl();
+                    out.println("<a href=\"editTask\" type=\"button\" class=\"col-sm-2 btn btn-primary my-2\">\n" +
+                                "New Task\n" +
+                                "</a>\n");
+                    out.println(taskMngCtrl.getTableOfTask(taskCtrl.getTaskInDepart(me.getDepartmentID())));
                 } else {
-                    out.println("<div>");
-                    for (int i = 0; i < tasks.size(); i++) {
-                        out.println("<div class=\"row mt-1 mb-1" + (tasks.get(i).isSeen() ? " seen" : " unseen") + "\">" +
-                                "<a href=\"MainPage?tab=1&page=" + page + "&task=" + i + "\" class=\"btn\" role=\"button\"><div class=\"row\"><div class=\"col-sm-10\" style=\"text-align: left\">" + toHtmlString(tasks.get(i).getName()) + (tasks.get(i).isSeen() ? "" : "    <span class=\"badge red\">New</span>") + "</div>" +
-                                "<div class=\"col-sm-2 deadline\">" + getRemainTime(tasks.get(i).getDeadline()) + "</div></div></a>" +
-                                "</div>");
+                    int page = 1;
+                    if (request.getParameter("page") != null && !request.getParameter("page").isEmpty()) {
+                        page = Integer.max(1, Integer.parseInt(request.getParameter("page")));
                     }
-                    out.println("</div>");
-                    //pagination
-                    out.println("<nav class=\"mt-3\">\n" +
-                                "  <ul class=\"pagination\">\n");
-                    out.println("    <li class=\"page-item" + (page == 1 ? " disabled" : "") + "\"><a class=\"page-link\" href=\"MainPage?tab=1&page=1\">First</a></li>\n");
-                    if (page > 1) {
-                        out.println("    <li class=\"page-item\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + (page - 1) + "\">" + (page-1) + "</a></li>\n");
+                    int taskCount = taskCtrl.getTaskCount(me.getID());
+                    int pageLen = 5;
+                    int pageCount = (taskCount - (taskCount % pageLen)) / pageLen + 1;
+                    List<Task> tasks = taskCtrl.getTasks(me.getID(), page-1, pageLen);
+                    if (request.getParameter("task") != null && !request.getParameter("task").isEmpty()) {
+                        int taskIndex = Integer.parseInt(request.getParameter("task"));
+                        Task task = tasks.get(taskIndex);
+                        if (!task.isSeen()) {
+                            taskCtrl.sawTask(me.getID(), task.getId());
+                            task.setSeen(true);
+                        }
+                        out.println("<div class=\"card mt-2 mb-2\">");
+                        out.println("<div class=\"card-header row\">" +
+                                "<div class=\"col-auto\"><a href=\"MainPage?tab=1&page=" + page + "\"><img class=\"back me-2\" src=\"resources/img/arrow-left-square.svg\" width=\"32\" height=\"32\"></a></div>" +
+                                "<div class=\"col my-auto\">" + toHtmlString(task.getName()) + "</div></div>");
+                        out.println("<div class=\"card-body\">Deadline: " + task.getDeadline().toString() + "</div>");
+                        out.println("<div class=\"card-body\">" + toHtmlString(task.getDesc()) + "</div>");
+                        out.println("<div class=\"card-body\">Member: </br>");
+                        for (int i = 0; i < task.getAssignedEmp().size(); i++) {
+                            out.println(" - " + task.getAssignedEmp().get(i).toString(false) + "</br>");
+                        }
+                        out.println("</div>");
+                        out.println("</div>");
+                        //assesment
+                        if (task.getDeadline().isBefore(LocalDateTime.now())) {
+                            out.println("<div class=\"alert alert-primary big-alert\">");
+                            out.println("Assessment: " + task.getAssesment() + "/100");
+                            out.println("</div>");
+                        }
+                    } else {
+                        out.println("<div>");
+                        for (int i = 0; i < tasks.size(); i++) {
+                            out.println("<div class=\"row mt-1 mb-1" + (tasks.get(i).isSeen() ? " seen" : " unseen") + "\">" +
+                                    "<a href=\"MainPage?tab=1&page=" + page + "&task=" + i + "\" class=\"btn\" role=\"button\"><div class=\"row\"><div class=\"col-sm-10\" style=\"text-align: left\">" + toHtmlString(tasks.get(i).getName()) + (tasks.get(i).isSeen() ? "" : "    <span class=\"badge red\">New</span>") + "</div>" +
+                                    "<div class=\"col-sm-2 deadline\">" + getRemainTime(tasks.get(i).getDeadline()) + "</div></div></a>" +
+                                    "</div>");
+                        }
+                        out.println("</div>");
+                        //pagination
+                        out.println("<nav class=\"mt-3\">\n" +
+                                    "  <ul class=\"pagination\">\n");
+                        out.println("    <li class=\"page-item" + (page == 1 ? " disabled" : "") + "\"><a class=\"page-link\" href=\"MainPage?tab=1&page=1\">First</a></li>\n");
+                        if (page > 1) {
+                            out.println("    <li class=\"page-item\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + (page - 1) + "\">" + (page-1) + "</a></li>\n");
+                        }
+                        out.println("    <li class=\"page-item active\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + page + "\">" + page + "</a></li>\n");
+                        if (page < pageCount) {
+                            out.println("    <li class=\"page-item\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + (page + 1) + "\">" + (page + 1) + "</a></li>\n");
+                        }
+                        out.println("    <li class=\"page-item" + (page == pageCount ? " disabled" : "") + "\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + pageCount + "\">Last</a></li>\n");
+                        out.println("  </ul>\n" +
+                                    "</nav>");
                     }
-                    out.println("    <li class=\"page-item active\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + page + "\">" + page + "</a></li>\n");
-                    if (page < pageCount) {
-                        out.println("    <li class=\"page-item\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + (page + 1) + "\">" + (page + 1) + "</a></li>\n");
-                    }
-                    out.println("    <li class=\"page-item" + (page == pageCount ? " disabled" : "") + "\"><a class=\"page-link\" href=\"MainPage?tab=1&page=" + pageCount + "\">Last</a></li>\n");
-                    out.println("  </ul>\n" +
-                                "</nav>");
                 }
             }
             

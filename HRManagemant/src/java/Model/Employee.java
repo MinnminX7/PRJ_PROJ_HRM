@@ -18,6 +18,7 @@ public class Employee {
     private Date BirthDate;
     private int DepartmentID;
     private int PositionID;
+    private int holidays;
     private String Email;
     private String Number;
 
@@ -33,6 +34,14 @@ public class Employee {
         this.PositionID = PositionID;
         this.Email = Email;
         this.Number = Number;
+    }
+
+    public int getHolidays() {
+        return holidays;
+    }
+
+    public void setHolidays(int holidays) {
+        this.holidays = holidays;
     }
 
     public int getID() {

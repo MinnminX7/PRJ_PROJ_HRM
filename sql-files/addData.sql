@@ -33,6 +33,8 @@ insert into TaskInfo (Name, [Desc], Deadline) values
 ('The very first Task', 'First do this.\nThen do this\nFinish it', '2020-07-13 00:00:00'),
 ('The Second but longgggggggg Task', 'First do this.123444\nThen do this 568937.\n Finish it', '2022-04-01 18:00:00');
 insert into StaffTask (id, EmpID, Seen, Mark) values
+(1, 6, 1, 60),
+(3, 6, 0, 0),
 (3, 8, 0, 0),
 (1, 8, 1, 70),
 (2, 8, 0, 0);

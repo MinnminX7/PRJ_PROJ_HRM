@@ -4,6 +4,7 @@
     Author     : Phong Linh
 --%>
 
+<%@page import="java.time.temporal.ChronoUnit"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.time.LocalDateTime"%>
 <%@page import="java.util.ArrayList"%>
@@ -27,7 +28,7 @@
                 t.setId(0);
                 t.setName("");
                 t.setDesc("");
-                t.setDeadline(LocalDateTime.now().plusDays(15));
+                t.setDeadline(LocalDateTime.now().plusDays(15).truncatedTo(ChronoUnit.MINUTES));
                 t.setAssignedEmp(new ArrayList<Member>());
             } else {
                 t = ctrl.getTask(Integer.parseInt(request.getParameter("id")));
@@ -51,6 +52,10 @@
             if (request.getParameter("date") != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
                 deadline = LocalDateTime.parse(request.getParameter("date"), formatter);
+            }
+            String submit1 = "editTask";
+            if (t.getId() != 0) {
+                submit1 += "?id=" +t.getId();
             }
         %>
     </head>
@@ -113,7 +118,7 @@
                     <button type='submit' form="editTaskForm" class='col-sm-2 btn btn-primary'>Save</button>
                 </div>
             </form>
-                    <form action='editTask?id=<%=t.getId()%>' method='POST' id='Search'></form>
+                    <form action='<%=submit1%>' method='POST' id='Search'></form>
         </div>
         <script>
             function uncheckMember(memberEle) {

@@ -29,7 +29,7 @@ public class TaskHtmlCtrl extends TaskCtrl {
         String rows = "";
         for (Task t : list) {
             rows += String.format("<tr> <td>%d</td> <td>%s</td> <td>%s</td> <td>%s</td> <td>%s</td> </tr>",
-                t.getId(), getShortVer(t.getName()), getShortVer(t.getDesc()), getRemainTime(t.getDeadline()), viewTaskModel(t) + "<a href=\"editTask?id=" + t.getId() + "\" class=\"btn btn-primary\">Edit</a>");
+                t.getId(), getShortVer(t.getName()), getShortVer(t.getDesc()), getRemainTime(t.getDeadline()), viewTaskModel(t) + "<a href=\"editTask?id=" + t.getId() + "\" class=\"btn btn-primary\">Edit</a> <a href=\"TaskMng?delete=" + t.getId() + "\" class=\"btn btn-danger\">Delete</a>");
         }
         return  "<table class=\"table table-striped table-hover\">\n" +
                 "   <thead><tr> <th>ID</th> <th>Name</th> <th>Description</th> <th>Status</th> <th>Action</th> </tr></thead>\n" +

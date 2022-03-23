@@ -33,6 +33,13 @@ public class TaskMng extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        TaskCtrl ctrl = new TaskCtrl();
+        if (!this.isNullOrEmpty(request.getParameter("delete"))) {
+            ctrl.deleteTask(Integer.parseInt(request.getParameter("delete")));
+            
+        response.sendRedirect("Login");
+        return;
+        }
         if (isNullOrEmpty(request.getParameter("name")) ||
                 isNullOrEmpty(request.getParameter("desc")) ||
                 isNullOrEmpty(request.getParameter("date")) ||
@@ -40,7 +47,6 @@ public class TaskMng extends HttpServlet {
             response.sendRedirect("Login");
             return;
         }
-        TaskCtrl ctrl = new TaskCtrl();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         String date = Timestamp.valueOf(LocalDateTime.parse(request.getParameter("date"), formatter)).toString();
         if (isNullOrEmpty(request.getParameter("id")) || request.getParameter("id").equals("0")) {
