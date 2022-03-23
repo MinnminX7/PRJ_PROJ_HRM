@@ -239,6 +239,8 @@ public class AdminPage extends HttpServlet {
                             "       <a class=\"nav-link\" href=\"control?tab=3\">Position</a>\n" +
                             "   </li>\n" +
                             "</ul>");
+                    TaskHtmlCtrl taskCtrl = new TaskHtmlCtrl();
+                    out.println(taskCtrl.getTableOfTask(taskCtrl.getAllTask()));
                     break;
                 case 2:
                     out.println("<ul class=\"nav nav-tabs\">\n" +
